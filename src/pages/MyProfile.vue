@@ -1,15 +1,23 @@
 <script>
 import AppH1 from '../components/AppH1.vue';
 import SubidorImagen from '../components/SubidorImagen.vue';
+import UserTag from '../components/UserTag.vue';
 import { subscribeToAuthStateChanges } from '../services/auth';
 import { getUserProfile, updateUserProfile } from '../services/users';
 import { fetchUserPosts, deletePost } from '../services/posts';
 import { fetchAllIntereses, fetchUserIntereses, updateUserIntereses } from '../services/intereses';
 import { darLike, quitarLike, verificarLike } from '../services/likes';
+import { usePopup } from '../composables/usePopup';
+import { useUserTags } from '../composables/useUserTags';
 
 export default {
     name: 'MyProfile',
-    components: { AppH1, SubidorImagen },
+    components: { AppH1, SubidorImagen, UserTag },
+    setup() {
+        const { show } = usePopup();
+        const { splitText } = useUserTags();
+        return { show, splitText };
+    },
     data() {
         return {
             user: {
@@ -52,7 +60,7 @@ export default {
                 
                 // validar nombre
                 if (!this.profile.nombre || this.profile.nombre.trim() === '') {
-                    alert('El nombre es obligatorio');
+                    await this.show('Error', 'El nombre es obligatorio');
                     return;
                 }
                 
@@ -84,10 +92,10 @@ export default {
                 await this.loadProfile();
                 await this.loadUserIntereses();
                 
-                alert('Perfil actualizado correctamente');
+                await this.show('Éxito', 'Perfil actualizado correctamente');
             } catch (error) {
                 console.error('[MyProfile.vue] Error al actualizar el perfil: ', error);
-                alert('Error al actualizar el perfil. Por favor, intenta de nuevo.');
+                await this.show('Error', 'Error al actualizar el perfil. Por favor, intenta de nuevo.');
             } finally {
                 this.saving = false;
             }
@@ -129,7 +137,8 @@ export default {
             return this.userIntereses.some(i => i.interes_id === interes.interes_id);
         },
         async handleDeletePost(postId) {
-            if (!confirm('¿Estás segura de que quieres eliminar esta publicación?')) {
+            const confirmed = await this.show('Confirmar eliminación', '¿Estás segura de que quieres eliminar esta publicación?', 'confirm');
+            if (!confirmed) {
                 return;
             }
             
@@ -139,7 +148,7 @@ export default {
                 this.posts = this.posts.filter(post => post.publicacion_id !== postId);
             } catch (error) {
                 console.error('[MyProfile.vue] Error al eliminar la publicación: ', error);
-                alert('Error al eliminar la publicación. Por favor, intenta de nuevo.');
+                await this.show('Error', 'Error al eliminar la publicación. Por favor, intenta de nuevo.');
             }
         },
         formatDate(dateString) {
@@ -183,7 +192,7 @@ export default {
         },
         async toggleLike(post) {
             if (!this.user.id) {
-                alert('Debes iniciar sesión para dar like');
+                await this.show('Iniciar sesión', 'Debes iniciar sesión para dar like');
                 return;
             }
 
@@ -210,13 +219,14 @@ export default {
                 }
             } catch (error) {
                 console.error('[MyProfile.vue] Error al manejar like:', error);
-                alert('Error al dar like. Por favor, intenta de nuevo.');
+                await this.show('Error', 'Error al dar like. Por favor, intenta de nuevo.');
             }
         },
         hasUserLiked(post) {
             if (!this.user.id || !post.likes) return false;
             return post.likes.some(like => like.perfil_id === this.user.id);
         },
+        
     },
     async mounted() {
         // cargar todos los intereses disponibles
@@ -475,14 +485,19 @@ export default {
                 </time>
             </header>
             
-            <img 
-                v-if="post.imagen_url" 
-                :src="post.imagen_url" 
-                :alt="`Imagen de ${post.titulo}`"
-                class="w-full max-h-96 object-cover rounded mb-4"
-            >
+                <img 
+                    v-if="post.imagen_url" 
+                    :src="post.imagen_url" 
+                    :alt="`Imagen de ${post.titulo}`"
+                    class="w-full aspect-square object-cover rounded-lg mb-4 max-w-md mx-auto"
+                >
             
-            <p class="text-gray-800 whitespace-pre-wrap mb-4">{{ post.descripcion }}</p>
+            <div class="text-gray-800 whitespace-pre-wrap mb-4">
+                <span v-for="(part, index) in splitText(post.descripcion)" :key="index">
+                    <UserTag v-if="part.startsWith('@')" :tag="part" />
+                    <span v-else>{{ part }}</span>
+                </span>
+            </div>
             
             <!-- Botón de Like y Eliminar -->
             <div class="flex items-center justify-between pt-4 border-t border-pink-100">

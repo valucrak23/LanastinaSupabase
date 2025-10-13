@@ -1,5 +1,42 @@
 import { supabase } from "./supabase";
 
+// genera un username único sin caracteres especiales
+async function generateUniqueUsername(baseUsername) {
+    // quitar todos los caracteres especiales excepto letras, números y guiones bajos
+    let cleanUsername = baseUsername
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, '')
+        .replace(/_{2,}/g, '_') // reemplazar múltiples guiones bajos por uno solo
+        .replace(/^_|_$/g, ''); // quitar guiones bajos del inicio y final
+    
+    // si queda vacío, usar 'usuario'
+    if (!cleanUsername) {
+        cleanUsername = 'usuario';
+    }
+    
+    // verificar si ya existe
+    let finalUsername = cleanUsername;
+    let counter = 1;
+    
+    while (await usernameExists(finalUsername)) {
+        finalUsername = `${cleanUsername}${counter}`;
+        counter++;
+    }
+    
+    return finalUsername;
+}
+
+// verifica si un username ya existe
+async function usernameExists(username) {
+    const { data, error } = await supabase
+        .from('perfiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+    
+    return !error && data !== null;
+}
+
 export async function getUserProfile(userId) {
     const { data, error } = await supabase
         .from('perfiles')
@@ -45,6 +82,9 @@ export async function upsertUserProfile(userId, email, nombre = null, apellido =
         // perfil no existe, crear uno nuevo
     }
     
+    // generar username limpio sin caracteres especiales
+    const cleanUsername = await generateUniqueUsername(emailUsername);
+    
     // crear perfil si no existe
     const nombreFinal = nombre || emailUsername;
     const apellidoFinal = apellido || '';
@@ -56,7 +96,7 @@ export async function upsertUserProfile(userId, email, nombre = null, apellido =
             email: email,
             nombre: nombreFinal,
             apellido: apellidoFinal,
-            username: emailUsername,
+            username: cleanUsername,
             es_admin: false
         })
         .select()
@@ -68,5 +108,20 @@ export async function upsertUserProfile(userId, email, nombre = null, apellido =
     }
 
     return data;
+}
+
+export async function getUserByUsername(username) {
+    const { data, error } = await supabase
+        .from('perfiles')
+        .select('perfil_id, username, nombre, apellido')
+        .eq('username', username)
+        .maybeSingle(); // Usar maybeSingle() en lugar de single()
+
+    if (error) {
+        console.error('[users.js getUserByUsername] Error al buscar usuario por username: ', error);
+        return null;
+    }
+
+    return data; // Retorna null si no se encuentra, o el objeto si se encuentra
 }
 

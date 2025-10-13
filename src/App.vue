@@ -1,9 +1,15 @@
 <script>
-// import Home from './pages/Home.vue';
 import { logout, subscribeToAuthStateChanges } from './services/auth';
+import Popup from './components/Popup.vue';
+import { usePopup } from './composables/usePopup';
 
 export default {
     name: 'App',
+    components: { Popup },
+    setup() {
+        const { showPopup, popupConfig, close } = usePopup();
+        return { showPopup, popupConfig, close };
+    },
     data() {
         return {
             user: {
@@ -15,13 +21,10 @@ export default {
     methods: {
         handleLogout() {
             logout();
-
-            // redireccionar al login
             this.$router.push('/ingresar');
         },
     },
     mounted() {
-        // suscribirse a cambios de autenticacion
         subscribeToAuthStateChanges(newUserState => this.user = newUserState);
     }
 }
@@ -29,36 +32,46 @@ export default {
 
 <template>
     <!-- navegacion principal -->
-    <nav class="flex items-center justify-between p-4 bg-pink-100 border-b-2 border-pink-300">
-        <div class="flex items-center gap-3">
-            <img src="/logo.png" alt="Logo Lanastina" class="w-8 h-8" />
-            <h1 class="text-2xl font-bold text-pink-800">🧶 Lanastina</h1>
-        </div>
+        <nav class="flex items-center justify-between p-4 bg-dark-800 border-b-2 border-primary-500 girly-shadow">
+            <div class="flex items-center gap-3">
+                <img src="/logo.png" alt="Logo Lanastina" class="w-8 h-8 rounded-full" />
+                <h1 class="text-2xl font-bold text-secondary-400">🧶 Lanastina</h1>
+            </div>
         <ul class="flex gap-6">
-            <li><RouterLink to="/" class="text-pink-700 hover:text-pink-900 transition">Inicio</RouterLink></li>
+            <li><RouterLink to="/" class="text-dark-100 hover:text-primary-400 transition font-medium">Inicio</RouterLink></li>
             <template v-if="user.id === null">
-                <li><RouterLink to="/ingresar" class="text-pink-700 hover:text-pink-900 transition">Ingresar</RouterLink></li>
-                <li><RouterLink to="/crear-cuenta" class="text-pink-700 hover:text-pink-900 transition">Crear cuenta</RouterLink></li>
+                <li><RouterLink to="/ingresar" class="text-dark-100 hover:text-primary-400 transition font-medium">Ingresar</RouterLink></li>
+                <li><RouterLink to="/crear-cuenta" class="text-dark-100 hover:text-primary-400 transition font-medium">Crear cuenta</RouterLink></li>
             </template>
             <template v-else>
-                <li><RouterLink to="/publicar" class="text-pink-700 hover:text-pink-900 transition">Nueva publicación</RouterLink></li>
-                <li><RouterLink to="/mi-perfil" class="text-pink-700 hover:text-pink-900 transition">Mi perfil</RouterLink></li>
+                <li><RouterLink to="/publicar" class="text-dark-100 hover:text-primary-400 transition font-medium">Nueva publicación</RouterLink></li>
+                <li><RouterLink to="/mi-perfil" class="text-dark-100 hover:text-primary-400 transition font-medium">Mi perfil</RouterLink></li>
                 <li>
                     <form 
                         action="#"
                         @submit.prevent="handleLogout"
                     >
-                        <button type="submit" class="text-pink-700 hover:text-pink-900 transition">Cerrar sesión</button>
+                        <button type="submit" class="text-dark-100 hover:text-primary-400 transition font-medium">Cerrar sesión</button>
                     </form>
                 </li>
             </template>
         </ul>
     </nav>
-    <main class="container p-4 mx-auto">
+    <main class="container p-4 mx-auto bg-dark-900 min-h-screen">
         <!-- router view para paginas -->
         <RouterView />
     </main>
-    <footer class="flex justify-center items-center p-6 bg-pink-800 text-pink-50">
-        <p>Lanastina - Red social de tejido &copy; 2025</p>
+    <footer class="flex justify-center items-center p-6 bg-dark-800 text-dark-100 border-t border-primary-500">
+        <p class="text-secondary-400">Lanastina - Red social de tejido &copy; 2025</p>
     </footer>
+    
+    <!-- popup global -->
+    <Popup 
+        :show="showPopup" 
+        :title="popupConfig.title"
+        :message="popupConfig.message"
+        :type="popupConfig.type"
+        @close="close"
+        @confirm="close"
+    />
 </template>

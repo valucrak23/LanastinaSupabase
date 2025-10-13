@@ -13,16 +13,6 @@ Lanastina es una red social temática dedicada al tejido, donde los usuarios pue
 - Administrar su perfil personal (nombre, biografía)
 - Eliminar sus propias publicaciones
 
-## Tecnologías Utilizadas
-
-- **Vue 3** - Framework progresivo de JavaScript con SFC (Single-File Components)
-- **Vue Router** - Enrutamiento oficial para Vue.js (SPA)
-- **Vite** - Build tool y bundler moderno
-- **Tailwind CSS 4** - Framework de CSS para estilización
-- **Supabase** - Backend-as-a-Service para:
-  - Autenticación (Auth API)
-  - Base de datos PostgreSQL
-  - Actualizaciones en tiempo real (Realtime API)
 
 ## Estructura del Proyecto
 
@@ -47,63 +37,6 @@ src/
 ├── App.vue             # Componente raíz
 ├── main.js             # Punto de entrada de la aplicación
 └── style.css           # Estilos globales
-```
-
-## Estructura de la Base de Datos
-
-### Tabla: `users`
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT NOT NULL UNIQUE,
-  display_name TEXT,
-  bio TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Habilitar RLS (Row Level Security)
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-
--- Políticas de seguridad
-CREATE POLICY "Los usuarios pueden ver todos los perfiles" 
-  ON users FOR SELECT 
-  USING (true);
-
-CREATE POLICY "Los usuarios pueden actualizar su propio perfil" 
-  ON users FOR UPDATE 
-  USING (auth.uid() = id);
-
-CREATE POLICY "Los usuarios pueden insertar su propio perfil" 
-  ON users FOR INSERT 
-  WITH CHECK (auth.uid() = id);
-```
-
-### Tabla: `posts`
-```sql
-CREATE TABLE posts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  image_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Habilitar RLS
-ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
-
--- Políticas de seguridad
-CREATE POLICY "Todos pueden ver las publicaciones" 
-  ON posts FOR SELECT 
-  USING (true);
-
-CREATE POLICY "Los usuarios autenticados pueden crear publicaciones" 
-  ON posts FOR INSERT 
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Los usuarios pueden eliminar sus propias publicaciones" 
-  ON posts FOR DELETE 
-  USING (auth.uid() = user_id);
 ```
 
 ## Instalación y Configuración
@@ -156,57 +89,70 @@ npm run dev
 - Visualización de perfiles de otros usuarios
 - Listado de publicaciones por usuario
 
-## Características Técnicas
+## Base de Datos
 
-### Semántica HTML
-- Uso correcto de etiquetas semánticas: `<nav>`, `<main>`, `<footer>`, `<article>`, `<header>`, `<section>`
-- Títulos jerárquicos (`<h1>`, `<h2>`, `<h3>`)
-- Elementos `<time>` con atributo `datetime`
+### Estructura de Entidades
 
-### Accesibilidad
-- Labels asociados a inputs
-- Atributos `alt` en imágenes
-- Estados de carga y disabled en formularios
-- Contraste de colores adecuado
+#### `perfiles` (Usuarios)
+- `perfil_id` (UUID, PK) - Identificador único del usuario
+- `email` (text) - Email del usuario
+- `username` (text, único) - Nombre de usuario generado automáticamente
+- `nombre` (text) - Nombre real del usuario
+- `apellido` (text) - Apellido del usuario
+- `biografia` (text) - Descripción personal del usuario
+- `foto_perfil_url` (text) - URL de la foto de perfil
+- `es_admin` (boolean) - Indica si es administrador
+- `created_at` (timestamp) - Fecha de creación
 
-### Patrones de Diseño
-- **Observer Pattern**: Implementado en el servicio de autenticación para notificar cambios de estado a múltiples componentes
-- **Service Layer**: Separación de la lógica de negocio en servicios reutilizables
+#### `publicaciones` (Posts)
+- `publicacion_id` (UUID, PK) - Identificador único del post
+- `perfil_id` (UUID, FK) - Referencia al usuario que creó el post
+- `titulo` (text) - Título del post
+- `descripcion` (text) - Descripción/contenido del post
+- `imagen_url` (text) - URL de la imagen del proyecto
+- `created_at` (timestamp) - Fecha de creación
 
-### Documentación
-- JSDoc en todas las funciones exportadas
-- Comentarios explicativos en código complejo
-- Nombres de variables y funciones descriptivos
+#### `likes`
+- `like_id` (UUID, PK) - Identificador único del like
+- `publicacion_id` (UUID, FK) - Referencia al post
+- `perfil_id` (UUID, FK) - Referencia al usuario que dio like
+- `created_at` (timestamp) - Fecha del like
 
-## Scripts Disponibles
+#### `intereses`
+- `interes_id` (UUID, PK) - Identificador único del interés
+- `nombre` (text) - Nombre del interés (ej: "Amigurumi", "Crochet")
+- `descripcion` (text) - Descripción del interés
 
-```bash
-npm run dev      # Ejecuta el servidor de desarrollo
-npm run build    # Construye la aplicación para producción
-npm run preview  # Previsualiza la build de producción
-```
+#### `usuario_intereses`
+- `usuario_interes_id` (UUID, PK) - Identificador único
+- `perfil_id` (UUID, FK) - Referencia al usuario
+- `interes_id` (UUID, FK) - Referencia al interés
 
-## Consideraciones de Seguridad
+#### `reportes_publicaciones`
+- `reporte_id` (UUID, PK) - Identificador único del reporte
+- `publicacion_id` (UUID, FK) - Referencia al post reportado
+- `reporter_id` (UUID, FK) - Referencia al usuario que reporta
+- `razon` (text) - Motivo del reporte
+- `created_at` (timestamp) - Fecha del reporte
 
-- Las políticas RLS de Supabase protegen los datos a nivel de base de datos
-- Los Navigation Guards protegen las rutas que requieren autenticación
-- Las claves de Supabase son públicas (anon key) y están diseñadas para uso en frontend
-- La seguridad real se implementa mediante las políticas RLS en Supabase
+#### `reportes_usuarios`
+- `reporte_id` (UUID, PK) - Identificador único del reporte
+- `usuario_reportado_id` (UUID, FK) - Referencia al usuario reportado
+- `reporter_id` (UUID, FK) - Referencia al usuario que reporta
+- `razon` (text) - Motivo del reporte
+- `created_at` (timestamp) - Fecha del reporte
 
-## Autor
-
-Proyecto desarrollado como primer parcial de Clientes Web Mobile - Da Vinci 2025
-
+### Relaciones
+- Un usuario puede tener muchas publicaciones (1:N)
+- Un usuario puede dar like a muchas publicaciones (N:M)
+- Un usuario puede tener muchos intereses (N:M)
+- Un usuario puede reportar muchas publicaciones (1:N)
+- Un usuario puede ser reportado muchas veces (1:N)
 
 ## Datos de Usuarios Creados
--- **admin** -- lanastina@gmail.com | admin123
-ana.tejedora@email.com	      | ana123
-carlos.crochet@email.com	    | carlos123
-maria.amigurumi@email.com	    | maria123
-luis.circular@email.com	      | luis123
-sofia.macrame@email.com	      | sofia123
-diego.bebes@email.com	        | diego123
-elena.accesorios@email.com	  | elena123
-roberto.decoracion@email.com	| roberto123
-laura.creativa@email.com	    | laura123
-miguel.artesano@email.com	    | miguel123
+- **admin**: lanastina@gmail.com | admin123
+- ana.tejedora@gmail.com | ana123
+- carlos.crochet@email.com | carlos123
+- maria.amigurumi@email.com | maria123
+- luis.circular@email.com | luis123
+- sofia.macrame@email.com | sofia123

@@ -1,1 +1,59 @@
 @import "tailwindcss";
+
+/* Tema girly oscuro - Turquesa y Lila */
+:root {
+  --bg-primary: #0f172a;        /* dark-900 */
+  --bg-secondary: #1e293b;      /* dark-800 */
+  --bg-card: #334155;           /* dark-700 */
+  --text-primary: #f8fafc;      /* dark-50 */
+  --text-secondary: #cbd5e1;    /* dark-300 */
+  --accent-primary: #0ea5e9;    /* primary-500 turquesa */
+  --accent-secondary: #a855f7;  /* secondary-500 lila */
+  --accent-pink: #ec4899;       /* accent-500 rosa */
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Estilos personalizados para elementos girly */
+.girly-gradient {
+  background: var(--accent-secondary);
+}
+
+.girly-text {
+  color: var(--accent-secondary);
+}
+
+.girly-shadow {
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
+}
+
+.girly-border {
+  border: 2px solid var(--accent-secondary);
+}
+
+/* Animaciones suaves */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary);
+}

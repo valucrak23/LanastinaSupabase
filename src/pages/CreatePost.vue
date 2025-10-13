@@ -2,10 +2,15 @@
 import AppH1 from '../components/AppH1.vue';
 import { createPost } from '../services/posts';
 import { subscribeToAuthStateChanges } from '../services/auth';
+import { usePopup } from '../composables/usePopup';
 
 export default {
     name: 'CreatePost',
     components: { AppH1, },
+    setup() {
+        const { show } = usePopup();
+        return { show };
+    },
     data() {
         return {
             user: {
@@ -48,7 +53,7 @@ export default {
                 }, 1000);
             } catch (error) {
                 console.error('[CreatePost.vue] Error al crear la publicación: ', error);
-                alert('Error al crear la publicación. Por favor, intenta de nuevo.');
+                await this.show('Error', 'Error al crear la publicación. Por favor, intenta de nuevo.');
             } finally {
                 this.loading = false;
             }

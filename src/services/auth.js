@@ -8,6 +8,8 @@ let user = {
 let observers = [];
 
 export async function register(email, password) {
+    console.log('[auth.js] Intentando registrar usuario:', email);
+    
     const { data, error } = await supabase
         .auth
         .signUp({
@@ -16,19 +18,37 @@ export async function register(email, password) {
         });
 
     if(error) {
-        console.error('[auth.js register] Error al crear el usuario: ', error);
+        console.error('[auth.js register] Error completo:', error);
+        console.error('[auth.js register] Status:', error.status);
+        console.error('[auth.js register] Message:', error.message);
         throw new Error(error.message);
     }
 
-    console.log("[auth.js] Usuario registrado: ", data);
+    console.log("[auth.js] Respuesta completa del registro:", data);
+    console.log("[auth.js] Usuario creado:", data.user);
+    console.log("[auth.js] Email confirmado:", data.user?.email_confirmed_at);
     
-    await upsertUserProfile(data.user.id, data.user.email);
-    
-    user = {
-        id: data.user.id,
-        email: data.user.email,
+    // Intentar crear perfil, pero no fallar si hay error
+    if (data.user) {
+        try {
+            await upsertUserProfile(data.user.id, data.user.email);
+            console.log("[auth.js] Perfil creado exitosamente");
+        } catch (profileError) {
+            console.warn("[auth.js] Error al crear perfil, pero usuario registrado:", profileError.message);
+            // No lanzar error, el usuario ya está registrado
+        }
+        
+        // Actualizar estado del usuario solo si está confirmado
+        if (data.user.email_confirmed_at) {
+            user = {
+                id: data.user.id,
+                email: data.user.email,
+            }
+            notifyAll();
+        }
     }
-    notifyAll();
+    
+    return data; // Devolver la respuesta completa
 }
 
 export async function login(email, password) {

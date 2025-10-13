@@ -1,12 +1,24 @@
 <script>
 import AppH1 from '../components/AppH1.vue';
+import UserTag from '../components/UserTag.vue';
 import { getUserProfile } from '../services/users';
 import { fetchUserPosts } from '../services/posts';
 import { fetchUserIntereses } from '../services/intereses';
+import { darLike, quitarLike, verificarLike } from '../services/likes';
+import { subscribeToAuthStateChanges } from '../services/auth';
+import { usePopup } from '../composables/usePopup';
+import { useUserTags } from '../composables/useUserTags';
+import { reportPost, reportUser, isUserAdmin } from '../services/reports';
+import { deletePost } from '../services/posts';
 
 export default {
     name: 'UserProfile',
-    components: { AppH1, },
+    components: { AppH1, UserTag },
+    setup() {
+        const { show } = usePopup();
+        const { splitText } = useUserTags();
+        return { show, splitText };
+    },
     data() {
         return {
             profile: null,
@@ -15,6 +27,11 @@ export default {
             error: null,
             userIntereses: [],
             showAllIntereses: false,
+            user: {
+                id: null,
+                email: null,
+            },
+            isAdmin: false,
         }
     },
     computed: {
@@ -37,17 +54,13 @@ export default {
         },
         async loadUserData() {
             const userId = this.$route.params.id;
-            console.log('[UserProfile.vue] Cargando datos para userId:', userId);
             
             try {
                 this.loading = true;
                 this.error = null;
                 
                 // verificar si el usuario existe
-                console.log('[UserProfile.vue] Verificando si el usuario existe...');
                 const profileData = await getUserProfile(userId);
-                console.log('[UserProfile.vue] Perfil cargado exitosamente:', profileData);
-                
                 this.profile = profileData;
                 
                 // cargar publicaciones e intereses en paralelo
@@ -59,28 +72,107 @@ export default {
                 
                 // cargar intereses por separado
                 try {
-                    console.log('[UserProfile.vue] Cargando intereses para userId:', userId);
                     this.userIntereses = await fetchUserIntereses(userId);
-                    console.log('[UserProfile.vue] Intereses cargados exitosamente:', this.userIntereses);
-                    console.log('[UserProfile.vue] Cantidad de intereses:', this.userIntereses.length);
                 } catch (interesesError) {
                     console.error('[UserProfile.vue] Error al cargar intereses del usuario: ', interesesError);
-                    console.error('[UserProfile.vue] Error details:', interesesError);
-                    this.userIntereses = []; // Fallback a array vacío
+                    this.userIntereses = [];
                 }
             } catch (error) {
                 console.error('[UserProfile.vue] Error al cargar los datos del usuario: ', error);
-                console.error('[UserProfile.vue] UserId intentado:', userId);
-                console.error('[UserProfile.vue] Tipo de error:', typeof error);
-                console.error('[UserProfile.vue] Error stack:', error.stack);
                 this.error = `No se pudo cargar el perfil del usuario. Error: ${error.message}`;
             } finally {
                 this.loading = false;
             }
         },
+        async toggleLike(post) {
+            if (!this.user.id) {
+                await this.show('Iniciar sesión', 'Debes iniciar sesión para dar like');
+                return;
+            }
+
+            try {
+                const hasLiked = await verificarLike(post.publicacion_id, this.user.id);
+                
+                if (hasLiked) {
+                    await quitarLike(post.publicacion_id, this.user.id);
+                    post.total_likes = Math.max(0, post.total_likes - 1);
+                    // actualizar estado local del like
+                    if (post.likes) {
+                        post.likes = post.likes.filter(like => like.perfil_id !== this.user.id);
+                    }
+                } else {
+                    const result = await darLike(post.publicacion_id, this.user.id);
+                    if (result !== null) {
+                        post.total_likes = (post.total_likes || 0) + 1;
+                        // actualizar estado local del like
+                        if (!post.likes) {
+                            post.likes = [];
+                        }
+                        post.likes.push({ perfil_id: this.user.id });
+                    }
+                }
+            } catch (error) {
+                console.error('[UserProfile.vue] Error al manejar like:', error);
+                await this.show('Error', 'Error al dar like. Por favor, intenta de nuevo.');
+            }
+        },
+        hasUserLiked(post) {
+            if (!this.user.id || !post.likes) return false;
+            return post.likes.some(like => like.perfil_id === this.user.id);
+        },
+        getTotalLikes(post) {
+            return post.likes ? post.likes.length : 0;
+        },
+        
+        async reportPost(post) {
+            const reason = await this.show('Reportar publicación', '¿Por qué quieres reportar esta publicación?', 'confirm');
+            if (!reason) return;
+            
+            try {
+                await reportPost(post.publicacion_id, this.user.id, reason);
+                await this.show('Reporte enviado', 'La publicación ha sido reportada. Los administradores la revisarán.');
+            } catch (error) {
+                console.error('[UserProfile.vue] Error al reportar publicación:', error);
+                await this.show('Error', 'Error al reportar la publicación. Intenta de nuevo.');
+            }
+        },
+        async reportUser() {
+            const reason = await this.show('Reportar usuario', '¿Por qué quieres reportar a este usuario?', 'confirm');
+            if (!reason) return;
+            
+            try {
+                await reportUser(this.profile.perfil_id, this.user.id, reason);
+                await this.show('Reporte enviado', 'El usuario ha sido reportado. Los administradores lo revisarán.');
+            } catch (error) {
+                console.error('[UserProfile.vue] Error al reportar usuario:', error);
+                await this.show('Error', 'Error al reportar al usuario. Intenta de nuevo.');
+            }
+        },
+        async deletePostAsAdmin(post) {
+            const confirmed = await this.show('Eliminar publicación', '¿Estás seguro de que quieres eliminar esta publicación como administrador?', 'confirm');
+            if (!confirmed) return;
+            
+            try {
+                await deletePost(post.publicacion_id);
+                this.posts = this.posts.filter(p => p.publicacion_id !== post.publicacion_id);
+                await this.show('Publicación eliminada', 'La publicación ha sido eliminada por un administrador.');
+            } catch (error) {
+                console.error('[UserProfile.vue] Error al eliminar publicación:', error);
+                await this.show('Error', 'Error al eliminar la publicación. Intenta de nuevo.');
+            }
+        },
     },
     mounted() {
         this.loadUserData();
+        // suscribirse a cambios de autenticacion
+        subscribeToAuthStateChanges(async (userState) => {
+            this.user = userState;
+            if (userState && userState.id) {
+                this.isAdmin = await isUserAdmin(userState.id);
+            } else {
+                this.isAdmin = false;
+            }
+        });
     },
     // watch para cambios de ruta
     watch: {
@@ -121,7 +213,16 @@ export default {
         </div>
 
         <section class="mb-8 p-6 border-2 border-pink-200 rounded-lg bg-white">
-            <h2 class="text-xl font-semibold text-pink-800 mb-3">Sobre este usuario</h2>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-xl font-semibold text-pink-800">Sobre este usuario</h2>
+                <button 
+                    v-if="user.id && user.id !== profile.perfil_id && !isAdmin"
+                    @click="reportUser"
+                    class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition"
+                >
+                    🚨 Reportar usuario
+                </button>
+            </div>
             
             <div class="mb-3">
                 <p class="text-sm font-semibold text-gray-600">Nombre</p>
@@ -179,9 +280,6 @@ export default {
                 <!-- Mensaje cuando no hay intereses -->
                 <div v-else class="text-gray-500 text-sm">
                     <p>Este usuario no tiene intereses seleccionados</p>
-                    <p class="text-xs mt-1 text-gray-400">
-                        Debug: userIntereses.length = {{ userIntereses.length }}
-                    </p>
                 </div>
             </div>
         </section>
@@ -212,10 +310,51 @@ export default {
                     v-if="post.imagen_url" 
                     :src="post.imagen_url" 
                     :alt="`Imagen de ${post.titulo}`"
-                    class="w-full max-h-96 object-cover rounded mb-4"
+                    class="w-full aspect-square object-cover rounded-lg mb-4 max-w-md mx-auto"
                 >
                 
-                <p class="text-gray-800 whitespace-pre-wrap">{{ post.descripcion }}</p>
+                <div class="text-gray-800 whitespace-pre-wrap mb-4">
+                    <span v-for="(part, index) in splitText(post.descripcion)" :key="index">
+                        <UserTag v-if="part.startsWith('@')" :tag="part" />
+                        <span v-else>{{ part }}</span>
+                    </span>
+                </div>
+                
+                <!-- Botones de Like, Reportar y Eliminar -->
+                <div class="flex items-center justify-between pt-4 border-t border-pink-100">
+                    <button 
+                        @click="toggleLike(post)"
+                        :class="[
+                            'flex items-center gap-2 px-3 py-2 rounded-full transition',
+                            hasUserLiked(post) 
+                                ? 'bg-pink-100 text-pink-700 border-2 border-pink-300' 
+                                : 'bg-gray-100 text-gray-600 border-2 border-gray-200 hover:bg-pink-50 hover:text-pink-600'
+                        ]"
+                    >
+                        <span class="text-lg">{{ hasUserLiked(post) ? '❤️' : '🤍' }}</span>
+                        <span class="font-medium">{{ getTotalLikes(post) }} {{ getTotalLikes(post) === 1 ? 'like' : 'likes' }}</span>
+                    </button>
+                    
+                    <div class="flex gap-2">
+                        <!-- Botón de reportar (para usuarios no admin) -->
+                        <button 
+                            v-if="user.id && user.id !== profile.perfil_id && !isAdmin"
+                            @click="reportPost(post)"
+                            class="px-3 py-2 rounded bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition"
+                        >
+                            🚨 Reportar
+                        </button>
+                        
+                        <!-- Botón de eliminar (solo para admin) -->
+                        <button 
+                            v-if="isAdmin"
+                            @click="deletePostAsAdmin(post)"
+                            class="px-3 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition"
+                        >
+                            🗑️ Eliminar
+                        </button>
+                    </div>
+                </div>
             </article>
         </section>
     </div>
