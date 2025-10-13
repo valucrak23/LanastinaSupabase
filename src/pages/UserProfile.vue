@@ -43,21 +43,21 @@ export default {
                 this.loading = true;
                 this.error = null;
                 
-                // Verificamos primero si el usuario existe
+                // verificar si el usuario existe
                 console.log('[UserProfile.vue] Verificando si el usuario existe...');
                 const profileData = await getUserProfile(userId);
                 console.log('[UserProfile.vue] Perfil cargado exitosamente:', profileData);
                 
                 this.profile = profileData;
                 
-                // Cargamos publicaciones e intereses en paralelo
+                // cargar publicaciones e intereses en paralelo
                 const [postsData] = await Promise.all([
                     fetchUserPosts(userId),
                 ]);
                 
                 this.posts = postsData;
                 
-                // Cargamos los intereses por separado para que no afecte al resto si falla
+                // cargar intereses por separado
                 try {
                     console.log('[UserProfile.vue] Cargando intereses para userId:', userId);
                     this.userIntereses = await fetchUserIntereses(userId);
@@ -82,10 +82,7 @@ export default {
     mounted() {
         this.loadUserData();
     },
-    /**
-     * Hook que se ejecuta cuando cambia la ruta.
-     * Útil para cuando navegamos de un perfil a otro.
-     */
+    // watch para cambios de ruta
     watch: {
         '$route.params.id': function() {
             this.loadUserData();

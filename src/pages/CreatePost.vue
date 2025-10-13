@@ -22,9 +22,7 @@ export default {
         }
     },
     methods: {
-        /**
-         * Maneja el envío del formulario de nueva publicación.
-         */
+        // envio de nueva publicacion
         async handleSubmit() {
             try {
                 this.loading = true;
@@ -39,12 +37,12 @@ export default {
 
                 this.successMessage = '¡Publicación creada con éxito!';
                 
-                // Limpiamos el formulario.
+                // limpiar formulario
                 this.post.titulo = '';
                 this.post.descripcion = '';
                 this.post.imagen_url = '';
 
-                // Redirigimos al inicio después de 1 segundo.
+                // redirigir al inicio
                 setTimeout(() => {
                     this.$router.push('/');
                 }, 1000);
@@ -57,7 +55,7 @@ export default {
         },
     },
     mounted() {
-        // Nos suscribimos al estado de autenticación para obtener el ID del usuario.
+        // suscribirse al estado de autenticacion
         subscribeToAuthStateChanges(newUserState => this.user = newUserState);
     },
 }

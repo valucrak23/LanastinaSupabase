@@ -11,8 +11,8 @@ export async function darLike(publicacionId, userId) {
         .single();
 
     if (error) {
-        // Si ya existe el like, no es un error real
-        if (error.code === '23505') { // Violación de constraint único
+        // si ya existe el like, no es un error real
+        if (error.code === '23505') { // violacion de constraint unico
             console.log('[likes.js darLike] Like ya existe');
             return null;
         }

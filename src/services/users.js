@@ -37,15 +37,15 @@ export async function updateUserProfile(userId, updates) {
 export async function upsertUserProfile(userId, email, nombre = null, apellido = '') {
     const emailUsername = email.split('@')[0];
     
-    // Verificar si el perfil ya existe para preservar datos existentes
+    // verificar si el perfil ya existe
     try {
         const existingProfile = await getUserProfile(userId);
         return existingProfile; // Retorna perfil existente sin modificarlo
     } catch (error) {
-        // Perfil no existe, crear uno nuevo
+        // perfil no existe, crear uno nuevo
     }
     
-    // Solo crear perfil si no existe
+    // crear perfil si no existe
     const nombreFinal = nombre || emailUsername;
     const apellidoFinal = apellido || '';
     

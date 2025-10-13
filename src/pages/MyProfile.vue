@@ -50,13 +50,13 @@ export default {
             try {
                 this.saving = true;
                 
-                // Validar que el nombre no esté vacío
+                // validar nombre
                 if (!this.profile.nombre || this.profile.nombre.trim() === '') {
                     alert('El nombre es obligatorio');
                     return;
                 }
                 
-                // Preparar datos para actualizar
+                // preparar datos para actualizar
                 const updates = {
                     nombre: this.profile.nombre ? this.profile.nombre.trim() : '',
                     apellido: this.profile.apellido ? this.profile.apellido.trim() : '',
@@ -64,23 +64,23 @@ export default {
                     foto_perfil_url: this.profile.foto_perfil_url || null
                 };
                 
-                // Manejar edad
+                // manejar edad
                 if (this.profile.edad && !isNaN(this.profile.edad) && this.profile.edad > 0 && this.profile.edad < 120) {
                     updates.edad = Number(this.profile.edad);
                 } else {
                     updates.edad = null;
                 }
                 
-                // Actualizar datos del perfil
+                // actualizar datos del perfil
                 await updateUserProfile(this.user.id, updates);
                 
-                // Actualizar intereses
+                // actualizar intereses
                 const selectedIntereses = this.userIntereses.map(interes => interes.interes_id);
                 await updateUserIntereses(this.user.id, selectedIntereses);
                 
                 this.editing = false;
                 
-                // Recargar datos de la BD
+                // recargar datos de la BD
                 await this.loadProfile();
                 await this.loadUserIntereses();
                 
@@ -94,7 +94,7 @@ export default {
         },
         async cancelEditing() {
             this.editing = false;
-            // Recargar datos originales de la BD (descarta cambios no guardados)
+            // recargar datos originales de la BD
             await this.loadProfile();
             await this.loadUserIntereses();
         },
@@ -135,7 +135,7 @@ export default {
             
             try {
                 await deletePost(postId);
-                // Removemos la publicación de la lista.
+                // remover publicacion de la lista
                 this.posts = this.posts.filter(post => post.publicacion_id !== postId);
             } catch (error) {
                 console.error('[MyProfile.vue] Error al eliminar la publicación: ', error);
@@ -193,7 +193,7 @@ export default {
                 if (hasLiked) {
                     await quitarLike(post.publicacion_id, this.user.id);
                     post.total_likes = Math.max(0, post.total_likes - 1);
-                    // Actualizar el estado local del like
+                    // actualizar estado local del like
                     if (post.likes) {
                         post.likes = post.likes.filter(like => like.perfil_id !== this.user.id);
                     }
@@ -201,7 +201,7 @@ export default {
                     const result = await darLike(post.publicacion_id, this.user.id);
                     if (result !== null) { // Solo incrementar si se creó exitosamente
                         post.total_likes = (post.total_likes || 0) + 1;
-                        // Actualizar el estado local del like
+                        // actualizar estado local del like
                         if (!post.likes) {
                             post.likes = [];
                         }
@@ -219,10 +219,10 @@ export default {
         },
     },
     async mounted() {
-        // Cargamos todos los intereses disponibles
+        // cargar todos los intereses disponibles
         await this.loadAllIntereses();
         
-        // Nos suscribimos al estado de autenticación.
+        // suscribirse al estado de autenticacion
         subscribeToAuthStateChanges(async (newUserState) => {
             this.user = newUserState;
             

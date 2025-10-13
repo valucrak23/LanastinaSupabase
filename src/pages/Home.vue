@@ -18,12 +18,7 @@ export default {
         }
     },
     methods: {
-        /**
-         * Formatea una fecha a un formato legible en español.
-         * 
-         * @param {string} dateString - Fecha en formato ISO
-         * @returns {string} Fecha formateada
-         */
+        // formatea fecha
         formatDate(dateString) {
             const date = new Date(dateString);
             const dateFormatter = new Intl.DateTimeFormat('es-AR', {
@@ -47,7 +42,7 @@ export default {
                 if (hasLiked) {
                     await quitarLike(post.publicacion_id, this.user.id);
                     post.total_likes = Math.max(0, post.total_likes - 1);
-                    // Actualizar el estado local del like
+                    // actualizar estado local del like
                     if (post.likes) {
                         post.likes = post.likes.filter(like => like.perfil_id !== this.user.id);
                     }
@@ -55,7 +50,7 @@ export default {
                     const result = await darLike(post.publicacion_id, this.user.id);
                     if (result !== null) { // Solo incrementar si se creó exitosamente
                         post.total_likes = (post.total_likes || 0) + 1;
-                        // Actualizar el estado local del like
+                        // actualizar estado local del like
                         if (!post.likes) {
                             post.likes = [];
                         }
@@ -71,27 +66,22 @@ export default {
             if (!this.user.id || !post.likes) return false;
             return post.likes.some(like => like.perfil_id === this.user.id);
         },
-        /**
-         * Obtiene el nombre para mostrar del usuario.
-         * 
-         * @param {Object} post - Objeto de publicación
-         * @returns {string} Nombre del usuario
-         */
+        // obtiene nombre del usuario
         getUserDisplayName(post) {
             return post.perfiles?.username || post.perfiles?.nombre || post.perfiles?.email || 'Usuario desconocido';
         },
     },
     async mounted() {
         try {
-            // Cargamos todas las publicaciones.
+            // cargar publicaciones
             this.posts = await fetchAllPosts();
             
-            // Nos suscribimos a las nuevas publicaciones en tiempo real.
+            // suscribirse a nuevas publicaciones
             subscribeToNewPosts((newPost) => {
                 this.posts.unshift(newPost);
             });
             
-            // Nos suscribimos a cambios de autenticación
+            // suscribirse a cambios de autenticacion
             subscribeToAuthStateChanges((userState) => {
                 this.user = userState;
             });

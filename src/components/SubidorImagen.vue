@@ -31,14 +31,12 @@ export default {
     }
   },
   methods: {
-    /**
-     * Maneja la selección de archivo.
-     */
+    // maneja seleccion de archivo
     async handleFileChange(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      // Validar imagen
+      // validar imagen
       const validacion = validarImagen(file);
       if (!validacion.valido) {
         this.error = validacion.error;
@@ -47,14 +45,14 @@ export default {
 
       this.error = null;
 
-      // Mostrar preview
+      // mostrar preview
       const reader = new FileReader();
       reader.onload = (e) => {
         this.preview = e.target.result;
       };
       reader.readAsDataURL(file);
 
-      // Subir imagen
+      // subir imagen
       try {
         this.subiendo = true;
         const url = await subirImagen(file, this.carpeta, this.userId);
@@ -67,9 +65,7 @@ export default {
       }
     },
     
-    /**
-     * Limpia la imagen seleccionada.
-     */
+    // limpia imagen seleccionada
     limpiarImagen() {
       this.preview = null;
       this.error = null;

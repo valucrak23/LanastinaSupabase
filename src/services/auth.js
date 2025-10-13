@@ -20,7 +20,7 @@ export async function register(email, password) {
         throw new Error(error.message);
     }
 
-    console.log("[auth.js register] Usuario registrado con éxito: ", data);
+    console.log("[auth.js] Usuario registrado: ", data);
     
     await upsertUserProfile(data.user.id, data.user.email);
     
@@ -44,7 +44,7 @@ export async function login(email, password) {
         throw new Error(error.message);
     }
 
-    console.log("Sesión iniciada correctamente: ", data);
+    console.log("[auth.js] Sesion iniciada: ", data);
     
     await upsertUserProfile(data.user.id, data.user.email);
     
