@@ -199,7 +199,8 @@ Proyecto desarrollado como primer parcial de Clientes Web Mobile - Da Vinci 2025
 
 
 ## Datos de Usuarios Creados
-ana.tejedora@email.com	       | ana123
+-- **admin** -- lanastina@gmail.com | admin123
+ana.tejedora@email.com	      | ana123
 carlos.crochet@email.com	    | carlos123
 maria.amigurumi@email.com	    | maria123
 luis.circular@email.com	      | luis123
