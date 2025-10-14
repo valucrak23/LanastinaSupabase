@@ -46,8 +46,6 @@ export default {
                     return;
                 }
 
-                console.log('[CreatePost] Creando publicación con perfil_id:', this.user.id);
-
                 await createPost(
                     this.post.titulo,
                     this.post.descripcion,
@@ -77,7 +75,6 @@ export default {
     mounted() {
         // suscribirse al estado de autenticacion
         subscribeToAuthStateChanges(newUserState => {
-            console.log('[CreatePost] Usuario recibido:', newUserState);
             this.user = newUserState;
         });
     },

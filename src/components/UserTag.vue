@@ -35,22 +35,14 @@ export default {
                 username = username.slice(0, -1);
             }
             
-            console.log('[UserTag] Tag recibido:', props.tag);
-            console.log('[UserTag] Username limpio:', username);
-            
             try {
-                console.log('[UserTag] Llamando a getUserByUsername...');
                 const userData = await getUserByUsername(username);
-                console.log('[UserTag] Respuesta de getUserByUsername:', userData);
                 
                 if (userData && userData.perfil_id) {
                     userId.value = userData.perfil_id;
-                    console.log('[UserTag] ✅ Usuario encontrado, ID asignado:', userData.perfil_id);
-                } else {
-                    console.log('[UserTag] ❌ Usuario no encontrado o sin perfil_id');
                 }
             } catch (error) {
-                console.error('[UserTag] ❌ Error en la búsqueda:', error);
+                console.error('[UserTag] Error en la búsqueda:', error);
             }
         });
 

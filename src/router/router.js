@@ -31,7 +31,6 @@ router.beforeEach((to, from) => {
     if(to.meta.requiresAuth && user.id === null) {
         return '/ingresar';
     }
-
 });
 
 export default router;
