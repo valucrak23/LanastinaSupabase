@@ -172,20 +172,20 @@ export default {
                                             to="/publicar" 
                                             @click="closeMobileMenu"
                                             class="block px-4 py-3 rounded-lg tejido-rosa transition-all duration-300 font-medium text-center"
-                                        >📝 Nueva publicación</RouterLink>
+                                        >📷 Nueva publicación</RouterLink>
                                     </li>
                                     <li>
                                         <RouterLink 
                                             to="/mi-perfil" 
                                             @click="closeMobileMenu"
                                             class="block px-4 py-3 rounded-lg text-crochet-violeta hover:text-black hover:bg-crochet-violeta transition-all duration-300 font-medium"
-                                        >👤 Mi perfil</RouterLink>
+                                        >🎅 Mi perfil</RouterLink>
                                     </li>
                                     <li>
                                         <button 
                                             @click="handleLogout(); closeMobileMenu()"
                                             class="w-full text-left px-4 py-3 rounded-lg text-crochet-violeta hover:text-black hover:bg-crochet-violeta transition-all duration-300 font-medium"
-                                        >🚪 Cerrar sesión</button>
+                                        >🗝 Cerrar sesión</button>
                                     </li>
             </template>
         </ul>
