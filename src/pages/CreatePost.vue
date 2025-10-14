@@ -66,7 +66,7 @@ export default {
                 }, 1000);
             } catch (error) {
                 console.error('[CreatePost.vue] Error al crear la publicación: ', error);
-                await this.show('Error', 'Error al crear la publicación. Por favor, intenta de nuevo.');
+                await this.show('Ups', 'No se pudo crear la publicación. Probá de nuevo.');
             } finally {
                 this.loading = false;
             }

@@ -100,10 +100,10 @@ export default {
                 await this.loadProfile();
                 await this.loadUserIntereses();
                 
-                await this.show('Éxito', 'Perfil actualizado correctamente');
+                await this.show('¡Listo!', 'Tu perfil se actualizó');
             } catch (error) {
                 console.error('[MyProfile.vue] Error al actualizar el perfil: ', error);
-                await this.show('Error', 'Error al actualizar el perfil. Por favor, intenta de nuevo.');
+                await this.show('Ups', 'No se pudo actualizar. Probá de nuevo.');
             } finally {
                 this.saving = false;
             }
@@ -156,7 +156,7 @@ export default {
                 this.posts = this.posts.filter(post => post.publicacion_id !== postId);
             } catch (error) {
                 console.error('[MyProfile.vue] Error al eliminar la publicación: ', error);
-                await this.show('Error', 'Error al eliminar la publicación. Por favor, intenta de nuevo.');
+                await this.show('Ups', 'No se pudo eliminar. Probá de nuevo.');
             }
         },
         formatDate(dateString) {
@@ -227,7 +227,7 @@ export default {
                 }
             } catch (error) {
                 console.error('[MyProfile.vue] Error al manejar like:', error);
-                await this.show('Error', 'Error al dar like. Por favor, intenta de nuevo.');
+                await this.show('Ups', 'No se pudo dar like. Probá de nuevo.');
             }
         },
         hasUserLiked(post) {
@@ -258,24 +258,24 @@ export default {
         // cambiar contraseña
         async handleChangePassword() {
             try {
-                // validaciones
+                // validar que puso todo
                 if (!this.passwordData.currentPassword) {
-                    await this.show('Error', 'La contraseña actual es requerida');
+                    await this.show('Ups', 'Poné tu contraseña actual');
                     return;
                 }
 
                 if (!this.passwordData.newPassword) {
-                    await this.show('Error', 'La nueva contraseña es requerida');
+                    await this.show('Ups', 'Poné una contraseña nueva');
                     return;
                 }
 
                 if (this.passwordData.newPassword.length < 6) {
-                    await this.show('Error', 'La contraseña debe tener al menos 6 caracteres');
+                    await this.show('Ups', 'La contraseña tiene que tener al menos 6 letras');
                     return;
                 }
 
                 if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
-                    await this.show('Error', 'Las contraseñas no coinciden');
+                    await this.show('Ups', 'Las contraseñas no son iguales');
                     return;
                 }
 
@@ -284,12 +284,12 @@ export default {
                 // cambiar contraseña
                 await changePassword(this.passwordData.currentPassword, this.passwordData.newPassword);
 
-                await this.show('Éxito', 'Contraseña cambiada correctamente');
+                await this.show('¡Listo!', 'Tu contraseña se cambió');
                 this.cancelChangePassword();
 
             } catch (error) {
                 console.error('Error al cambiar contraseña:', error);
-                await this.show('Error', error.message);
+                await this.show('Ups', error.message);
             } finally {
                 this.changingPassword = false;
             }
@@ -612,7 +612,7 @@ export default {
                         <span class="text-lg">🔒</span>
                     </div>
                     <h3 class="text-xl font-bold text-crochet-text mb-1">Cambiar Contraseña</h3>
-                    <p class="text-crochet-text-muted text-xs">Actualiza tu contraseña de forma segura</p>
+                    <p class="text-crochet-text-muted text-xs">Poné una contraseña nueva</p>
                 </div>
                 
                 <form @submit.prevent="handleChangePassword" class="relative z-10">
@@ -678,7 +678,7 @@ export default {
                         <div class="flex items-center">
                             <span class="text-sm mr-2">⚠️</span>
                             <p class="text-xs text-crochet-text font-medium">
-                                Solo puedes cambiar tu contraseña <span class="font-bold text-crochet-rosa">una vez por semana</span>
+                                Solo podés cambiar tu contraseña <span class="font-bold text-crochet-rosa">una vez por semana</span>
                             </p>
                         </div>
                     </div>

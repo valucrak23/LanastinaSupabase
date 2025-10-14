@@ -59,7 +59,7 @@ export default {
         const url = await subirImagen(file, this.carpeta, this.userId);
         this.$emit('imagen-subida', url);
       } catch (error) {
-        this.error = 'Error al subir la imagen. Intenta de nuevo.';
+        this.error = 'No se pudo subir la imagen. Probá de nuevo.';
         console.error('[SubidorImagen.vue] Error:', error);
       } finally {
         this.subiendo = false;

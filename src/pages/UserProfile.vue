@@ -113,7 +113,7 @@ export default {
                 }
             } catch (error) {
                 console.error('[UserProfile.vue] Error al manejar like:', error);
-                await this.show('Error', 'Error al dar like. Por favor, intenta de nuevo.');
+                await this.show('Ups', 'No se pudo dar like. Probá de nuevo.');
             }
         },
         hasUserLiked(post) {
@@ -130,10 +130,10 @@ export default {
             
             try {
                 await reportPost(post.publicacion_id, this.user.id, reason);
-                await this.show('Reporte enviado', 'La publicación ha sido reportada. Los administradores la revisarán.');
+                await this.show('Reporte enviado', 'Lo reportamos. Los admin lo van a revisar.');
             } catch (error) {
                 console.error('[UserProfile.vue] Error al reportar publicación:', error);
-                await this.show('Error', 'Error al reportar la publicación. Intenta de nuevo.');
+                await this.show('Ups', 'No se pudo reportar. Probá de nuevo.');
             }
         },
         async reportUser() {
@@ -142,10 +142,10 @@ export default {
             
             try {
                 await reportUser(this.profile.perfil_id, this.user.id, reason);
-                await this.show('Reporte enviado', 'El usuario ha sido reportado. Los administradores lo revisarán.');
+                await this.show('Reporte enviado', 'Lo reportamos. Los admin lo van a revisar.');
             } catch (error) {
                 console.error('[UserProfile.vue] Error al reportar usuario:', error);
-                await this.show('Error', 'Error al reportar al usuario. Intenta de nuevo.');
+                await this.show('Ups', 'No se pudo reportar. Probá de nuevo.');
             }
         },
         async deletePostAsAdmin(post) {
@@ -155,10 +155,10 @@ export default {
             try {
                 await deletePost(post.publicacion_id);
                 this.posts = this.posts.filter(p => p.publicacion_id !== post.publicacion_id);
-                await this.show('Publicación eliminada', 'La publicación ha sido eliminada por un administrador.');
+                await this.show('Publicación eliminada', 'La eliminamos.');
             } catch (error) {
                 console.error('[UserProfile.vue] Error al eliminar publicación:', error);
-                await this.show('Error', 'Error al eliminar la publicación. Intenta de nuevo.');
+                await this.show('Ups', 'No se pudo eliminar. Probá de nuevo.');
             }
         },
     },

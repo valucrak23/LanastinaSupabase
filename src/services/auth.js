@@ -98,16 +98,16 @@ export function getCurrentUser() {
 }
 
 
-// cambiar contraseña con limite de una vez por semana
+// cambiar contraseña (solo una vez por semana)
 export async function changePassword(currentPassword, newPassword) {
     try {
-        // verificar si puede cambiar contraseña (una vez por semana)
+        // chequear si puede cambiar (una vez por semana nomás)
         const canChange = await canChangePasswordThisWeek();
         if (!canChange.allowed) {
-            throw new Error(`Debes esperar hasta ${canChange.nextAllowedDate} para cambiar tu contraseña nuevamente`);
+            throw new Error(`Tenés que esperar hasta ${canChange.nextAllowedDate} para cambiar tu contraseña otra vez`);
         }
 
-        // verificar contraseña actual (opcional - comentado para evitar problemas)
+        // verificar contraseña actual (lo comenté para evitar quilombos)
         // const { error: signInError } = await supabase.auth.signInWithPassword({
         //     email: user.email,
         //     password: currentPassword
@@ -127,7 +127,7 @@ export async function changePassword(currentPassword, newPassword) {
             throw new Error(error.message);
         }
 
-        // registrar el cambio de contraseña
+        // guardar que cambió la contraseña
         await recordPasswordChange();
         
         return { success: true };
@@ -137,7 +137,7 @@ export async function changePassword(currentPassword, newPassword) {
     }
 }
 
-// verificar si puede cambiar contraseña esta semana
+// ver si puede cambiar contraseña esta semana
 async function canChangePasswordThisWeek() {
     try {
         const { data, error } = await supabase
@@ -149,11 +149,11 @@ async function canChangePasswordThisWeek() {
 
         if (error) {
             console.error('[auth.js] Error al verificar cambios de contraseña:', error);
-            return { allowed: true }; // permitir si hay error en la consulta
+            return { allowed: true }; // si hay error, dejarlo pasar
         }
 
         if (!data || data.length === 0) {
-            return { allowed: true }; // nunca ha cambiado contraseña
+            return { allowed: true }; // nunca cambió contraseña
         }
 
         const lastChange = new Date(data[0].fecha_cambio);
@@ -172,11 +172,11 @@ async function canChangePasswordThisWeek() {
         }
     } catch (error) {
         console.error('[auth.js] Error en canChangePasswordThisWeek:', error);
-        return { allowed: true }; // permitir si hay error
+        return { allowed: true }; // si hay error, dejarlo pasar jeje
     }
 }
 
-// registrar cambio de contraseña
+// anotar que cambió la contraseña
 async function recordPasswordChange() {
     try {
         const { error } = await supabase

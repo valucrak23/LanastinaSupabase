@@ -68,7 +68,7 @@ export default {
                 }
             } catch (error) {
                 console.error('[Home.vue] Error al manejar like:', error);
-                await this.show('Error', 'Error al dar like. Por favor, intenta de nuevo.');
+                await this.show('Ups', 'No se pudo dar like. Probá de nuevo.');
             }
         },
         hasUserLiked(post) {
@@ -108,20 +108,20 @@ export default {
         <!-- Hero section -->
         <div class="bg-crochet-bg-secondary rounded-3xl p-12 mb-12 text-center border-2 border-crochet-violeta/30">
                 <h1 class="text-6xl font-bold mb-6 text-crochet-violeta">
-                    ¡Bienvenida a Lanastina! 🧶
+                    ¡Hola! 🧶
                 </h1>
                 <p class="text-xl text-crochet-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-                    La red social para amantes del tejido. Comparte tus proyectos, inspírate con otros tejedores y aprende nuevas técnicas.
+                    Un lugar donde las tejedoras compartimos nuestros proyectos, nos inspiramos mutuamente y aprendemos juntas.
                 </p>
                 <div class="flex justify-center gap-4 text-crochet-text-muted">
                     <span class="flex items-center gap-2">
-                        <span class="text-crochet-verde">✨</span> Proyectos únicos
+                        <span class="text-crochet-verde">✨</span> Proyectos
                     </span>
                     <span class="flex items-center gap-2">
-                        <span class="text-crochet-turquesa">🎨</span> Inspiración
+                        <span class="text-crochet-turquesa">🎨</span> Ideas
                     </span>
                     <span class="flex items-center gap-2">
-                        <span class="text-crochet-rosa">👥</span> Comunidad
+                        <span class="text-crochet-rosa">👥</span> Amigas
                     </span>
                 </div>
         </div>
