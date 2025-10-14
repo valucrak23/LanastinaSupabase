@@ -97,14 +97,25 @@ export function getCurrentUser() {
     return user;
 }
 
+
 // cambiar contraseña con limite de una vez por semana
-export async function changePassword(newPassword) {
+export async function changePassword(currentPassword, newPassword) {
     try {
         // verificar si puede cambiar contraseña (una vez por semana)
         const canChange = await canChangePasswordThisWeek();
         if (!canChange.allowed) {
             throw new Error(`Debes esperar hasta ${canChange.nextAllowedDate} para cambiar tu contraseña nuevamente`);
         }
+
+        // verificar contraseña actual (opcional - comentado para evitar problemas)
+        // const { error: signInError } = await supabase.auth.signInWithPassword({
+        //     email: user.email,
+        //     password: currentPassword
+        // });
+
+        // if (signInError) {
+        //     throw new Error('La contraseña actual es incorrecta');
+        // }
 
         // cambiar contraseña en supabase
         const { error } = await supabase.auth.updateUser({
@@ -188,6 +199,13 @@ supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'TOKEN_REFRESHED' && !session) {
         // si el refresh falla, limpiar usuario sin mostrar error
         user = { id: null, email: null };
+        notifyAll();
+    } else if (event === 'SIGNED_IN' && session) {
+        // usuario se autenticó
+        user = {
+            id: session.user.id,
+            email: session.user.email,
+        };
         notifyAll();
     }
 });

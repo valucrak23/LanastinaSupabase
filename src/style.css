@@ -21,6 +21,16 @@
   --verde-vivo: #9ece6a;        /* verde menta */
   --azul-vivo: #7aa2f7;         /* azul cielo */
   
+  /* Variables específicas para popups */
+  --crochet-bg: var(--bg-secondary);
+  --crochet-text: var(--text-primary);
+  --crochet-text-muted: var(--text-secondary);
+  --crochet-violeta: var(--violeta-vivo);
+  --crochet-turquesa: var(--turquesa-vivo);
+  --crochet-rosa: var(--rosa-vivo);
+  --crochet-verde: var(--verde-vivo);
+  --crochet-bg-secondary: var(--bg-card);
+  
   /* Sombras suaves */
   --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 20px rgba(187, 154, 247, 0.3);
@@ -36,6 +46,51 @@ body {
 /* Efectos crochet master */
 .crochet-glow {
   box-shadow: var(--shadow-glow);
+}
+
+/* Estilos específicos para popups */
+.popup-overlay {
+  background: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.popup-content {
+  background: var(--crochet-bg) !important;
+  opacity: 1 !important;
+}
+
+/* Botones menos fluorescentes */
+.btn-turquesa {
+  background: rgba(38, 208, 206, 0.8) !important;
+  border: 1px solid rgba(38, 208, 206, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.btn-turquesa:hover {
+  background: rgba(38, 208, 206, 0.9) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.btn-rosa {
+  background: rgba(247, 118, 142, 0.8) !important;
+  border: 1px solid rgba(247, 118, 142, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.btn-rosa:hover {
+  background: rgba(247, 118, 142, 0.9) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.btn-violeta {
+  background: rgba(187, 154, 247, 0.8) !important;
+  border: 1px solid rgba(187, 154, 247, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.btn-violeta:hover {
+  background: rgba(187, 154, 247, 0.9) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .crochet-card {

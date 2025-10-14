@@ -9,7 +9,6 @@ import { fetchAllIntereses, fetchUserIntereses, updateUserIntereses } from '../s
 import { darLike, quitarLike, verificarLike } from '../services/likes';
 import { usePopup } from '../composables/usePopup';
 import { useUserTags } from '../composables/useUserTags';
-import { useRouter } from 'vue-router';
 
 export default {
     name: 'MyProfile',
@@ -17,8 +16,7 @@ export default {
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();
-        const router = useRouter();
-        return { show, splitText, router };
+        return { show, splitText };
     },
     data() {
         return {
@@ -237,94 +235,6 @@ export default {
             return post.likes.some(like => like.perfil_id === this.user.id);
         },
 
-        // cargar todos los intereses disponibles
-        async loadAllIntereses() {
-            try {
-                this.allIntereses = await fetchAllIntereses();
-            } catch (error) {
-                console.error('Error al cargar intereses:', error);
-                this.allIntereses = [];
-            }
-        },
-
-        // cargar intereses del usuario
-        async loadUserIntereses() {
-            try {
-                if (this.user.id) {
-                    this.userIntereses = await fetchUserIntereses(this.user.id);
-                }
-            } catch (error) {
-                console.error('Error al cargar intereses del usuario:', error);
-                this.userIntereses = [];
-            }
-        },
-
-        // cargar perfil del usuario
-        async loadProfile() {
-            try {
-                console.log('[MyProfile] Cargando perfil para usuario:', this.user.id);
-                if (this.user.id) {
-                    this.profile = await getUserProfile(this.user.id);
-                    console.log('[MyProfile] Perfil cargado:', this.profile);
-                }
-            } catch (error) {
-                console.error('Error al cargar perfil:', error);
-                this.profile = {
-                    nombre: '',
-                    apellido: '',
-                    username: '',
-                    edad: null,
-                    descripcion: '',
-                    foto_perfil_url: null,
-                };
-            }
-        },
-
-        // cargar publicaciones del usuario
-        async loadPosts() {
-            try {
-                if (this.user.id) {
-                    this.posts = await fetchUserPosts(this.user.id);
-                }
-            } catch (error) {
-                console.error('Error al cargar publicaciones:', error);
-                this.posts = [];
-            } finally {
-                this.loading = false;
-            }
-        }
-    },
-    async mounted() {
-        console.log('[MyProfile] Componente montado, usuario actual:', this.user);
-        
-        // cargar todos los intereses disponibles
-        await this.loadAllIntereses();
-        
-        // suscribirse al estado de autenticacion
-        subscribeToAuthStateChanges(async (newUserState) => {
-            console.log('[MyProfile] Estado de auth cambiado:', newUserState);
-            this.user = newUserState;
-            
-            if (this.user.id) {
-                await this.loadProfile();
-                await this.loadUserIntereses();
-                await this.loadPosts();
-            }
-        });
-
-        // cargar datos iniciales si ya hay usuario
-        if (this.user.id) {
-            console.log('[MyProfile] Cargando datos iniciales para usuario:', this.user.id);
-            await this.loadProfile();
-            await this.loadUserIntereses();
-            await this.loadPosts();
-        } else {
-            console.log('[MyProfile] No hay usuario autenticado, redirigiendo al login...');
-            this.router.push('/ingresar');
-        }
-    },
-
-    methods: {
         // mostrar formulario de cambio de contraseña
         showChangePassword() {
             this.showPasswordForm = true;
@@ -349,36 +259,56 @@ export default {
         async handleChangePassword() {
             try {
                 // validaciones
+                if (!this.passwordData.currentPassword) {
+                    await this.show('Error', 'La contraseña actual es requerida');
+                    return;
+                }
+
                 if (!this.passwordData.newPassword) {
-                    await this.show('Error', 'La nueva contraseña es requerida', 'error');
+                    await this.show('Error', 'La nueva contraseña es requerida');
                     return;
                 }
 
                 if (this.passwordData.newPassword.length < 6) {
-                    await this.show('Error', 'La contraseña debe tener al menos 6 caracteres', 'error');
+                    await this.show('Error', 'La contraseña debe tener al menos 6 caracteres');
                     return;
                 }
 
                 if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
-                    await this.show('Error', 'Las contraseñas no coinciden', 'error');
+                    await this.show('Error', 'Las contraseñas no coinciden');
                     return;
                 }
 
                 this.changingPassword = true;
 
                 // cambiar contraseña
-                await changePassword(this.passwordData.newPassword);
+                await changePassword(this.passwordData.currentPassword, this.passwordData.newPassword);
 
-                await this.show('Éxito', 'Contraseña cambiada correctamente', 'success');
+                await this.show('Éxito', 'Contraseña cambiada correctamente');
                 this.cancelChangePassword();
 
             } catch (error) {
                 console.error('Error al cambiar contraseña:', error);
-                await this.show('Error', error.message, 'error');
+                await this.show('Error', error.message);
             } finally {
                 this.changingPassword = false;
             }
         }
+    },
+    async mounted() {
+        // cargar todos los intereses disponibles
+        await this.loadAllIntereses();
+        
+        // suscribirse al estado de autenticacion
+        subscribeToAuthStateChanges(async (newUserState) => {
+            this.user = newUserState;
+            
+            if (this.user.id) {
+                await this.loadProfile();
+                await this.loadUserIntereses();
+                await this.loadPosts();
+            }
+        });
     },
 }
 </script>
@@ -670,58 +600,114 @@ export default {
         </article>
 
         <!-- Modal de cambio de contraseña -->
-        <div v-if="showPasswordForm" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50" @click="cancelChangePassword">
-            <div class="crochet-card p-8 max-w-md w-full mx-4 shadow-2xl border-2 border-crochet-violeta/50" @click.stop>
-                <h3 class="text-2xl font-bold text-crochet-text mb-6 text-center">🔒 Cambiar Contraseña</h3>
+        <div v-if="showPasswordForm" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4" @click="cancelChangePassword">
+            <div class="crochet-card p-5 max-w-md w-full shadow-2xl border-2 border-crochet-violeta/50 animate-scale-in relative overflow-hidden" @click.stop>
+                <!-- Decoración de fondo -->
+                <div class="absolute top-0 right-0 w-20 h-20 bg-crochet-turquesa/10 rounded-full -translate-y-10 translate-x-10"></div>
+                <div class="absolute bottom-0 left-0 w-16 h-16 bg-crochet-rosa/10 rounded-full translate-y-8 -translate-x-8"></div>
                 
-                <form @submit.prevent="handleChangePassword">
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-crochet-text mb-2">
+                <!-- Header compacto -->
+                <div class="text-center mb-4 relative z-10">
+                    <div class="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-crochet-violeta to-crochet-turquesa rounded-full mb-2 animate-bounce">
+                        <span class="text-lg">🔒</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-crochet-text mb-1">Cambiar Contraseña</h3>
+                    <p class="text-crochet-text-muted text-xs">Actualiza tu contraseña de forma segura</p>
+                </div>
+                
+                <form @submit.prevent="handleChangePassword" class="relative z-10">
+                    <!-- Contraseña actual -->
+                    <div class="mb-3">
+                        <label class="block text-sm font-semibold text-crochet-text mb-1 flex items-center">
+                            <span class="w-1.5 h-1.5 bg-crochet-turquesa rounded-full mr-2"></span>
+                            Contraseña actual
+                        </label>
+                        <div class="relative">
+                            <input
+                                v-model="passwordData.currentPassword"
+                                type="password"
+                                required
+                                class="crochet-input w-full pl-10 pr-4 py-2.5 text-sm"
+                                placeholder="Contraseña actual"
+                            >
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-crochet-text-muted">🔑</span>
+                        </div>
+                    </div>
+
+                    <!-- Nueva contraseña -->
+                    <div class="mb-3">
+                        <label class="block text-sm font-semibold text-crochet-text mb-1 flex items-center">
+                            <span class="w-1.5 h-1.5 bg-crochet-rosa rounded-full mr-2"></span>
                             Nueva contraseña
                         </label>
-                        <input
-                            v-model="passwordData.newPassword"
-                            type="password"
-                            required
-                            minlength="6"
-                            class="crochet-input w-full"
-                            placeholder="Mínimo 6 caracteres"
-                        >
+                        <div class="relative">
+                            <input
+                                v-model="passwordData.newPassword"
+                                type="password"
+                                required
+                                minlength="6"
+                                class="crochet-input w-full pl-10 pr-4 py-2.5 text-sm"
+                                placeholder="Mínimo 6 caracteres"
+                            >
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-crochet-text-muted">✨</span>
+                        </div>
                     </div>
 
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-crochet-text mb-2">
+                    <!-- Confirmar contraseña -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-crochet-text mb-1 flex items-center">
+                            <span class="w-1.5 h-1.5 bg-crochet-verde rounded-full mr-2"></span>
                             Confirmar contraseña
                         </label>
-                        <input
-                            v-model="passwordData.confirmPassword"
-                            type="password"
-                            required
-                            minlength="6"
-                            class="crochet-input w-full"
-                            placeholder="Repite la contraseña"
-                        >
+                        <div class="relative">
+                            <input
+                                v-model="passwordData.confirmPassword"
+                                type="password"
+                                required
+                                minlength="6"
+                                class="crochet-input w-full pl-10 pr-4 py-2.5 text-sm"
+                                placeholder="Repite la contraseña"
+                            >
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-crochet-text-muted">🔄</span>
+                        </div>
                     </div>
 
-                    <p class="text-sm text-crochet-text-muted mb-6 text-center bg-crochet-rosa/20 p-3 rounded-lg border border-crochet-rosa/30">
-                        ⚠️ Solo puedes cambiar tu contraseña una vez por semana
-                    </p>
+                    <!-- Advertencia compacta -->
+                    <div class="mb-4 p-2.5 bg-gradient-to-r from-crochet-rosa/20 to-crochet-violeta/20 rounded-lg border border-crochet-rosa/30 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-crochet-rosa to-crochet-violeta"></div>
+                        <div class="flex items-center">
+                            <span class="text-sm mr-2">⚠️</span>
+                            <p class="text-xs text-crochet-text font-medium">
+                                Solo puedes cambiar tu contraseña <span class="font-bold text-crochet-rosa">una vez por semana</span>
+                            </p>
+                        </div>
+                    </div>
 
-                    <div class="flex gap-4">
+                    <!-- Botones compactos -->
+                    <div class="flex gap-3">
                         <button
                             type="submit"
                             :disabled="changingPassword"
-                            class="btn-turquesa flex-1"
+                            class="btn-turquesa flex-1 py-2.5 text-sm font-bold relative overflow-hidden group"
                         >
-                            {{ changingPassword ? 'Cambiando...' : 'Cambiar contraseña' }}
+                            <span class="relative z-10 flex items-center justify-center">
+                                <span v-if="changingPassword" class="animate-spin mr-2 text-xs">⏳</span>
+                                <span v-else class="mr-2">🔒</span>
+                                {{ changingPassword ? 'Cambiando...' : 'Cambiar' }}
+                            </span>
+                            <div class="absolute inset-0 bg-gradient-to-r from-crochet-turquesa to-crochet-verde opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </button>
                         <button
                             type="button"
                             @click="cancelChangePassword"
                             :disabled="changingPassword"
-                            class="btn-rosa flex-1"
+                            class="btn-rosa flex-1 py-2.5 text-sm font-bold relative overflow-hidden group"
                         >
-                            Cancelar
+                            <span class="relative z-10 flex items-center justify-center">
+                                <span class="mr-2">❌</span>
+                                Cancelar
+                            </span>
+                            <div class="absolute inset-0 bg-gradient-to-r from-crochet-rosa to-crochet-violeta opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </button>
                     </div>
                 </form>
@@ -731,6 +717,35 @@ export default {
 </template>
 
 <style scoped>
+/* Animaciones para el popup */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+}
+
+.animate-scale-in {
+    animation: scale-in 0.3s ease-out;
+}
+
 .foto-perfil-container {
     width: 120px;
     height: 120px;
