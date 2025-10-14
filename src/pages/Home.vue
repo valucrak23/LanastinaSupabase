@@ -108,7 +108,7 @@ export default {
         <!-- Hero section -->
         <div class="bg-crochet-bg-secondary rounded-3xl p-12 mb-12 text-center border-2 border-crochet-violeta/30">
                 <h1 class="text-6xl font-bold mb-6 text-crochet-violeta">
-                    ¡Hola! 🧶
+                    Bienvenidos a Lanastina!
                 </h1>
                 <p class="text-xl text-crochet-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
                     Un lugar donde las tejedoras compartimos nuestros proyectos, nos inspiramos mutuamente y aprendemos juntas.
@@ -128,7 +128,7 @@ export default {
 
         <section class="mt-8">
             <h2 class="mb-8 text-3xl font-bold text-crochet-violeta text-center">
-                📱 Publicaciones recientes
+                Publicaciones recientes
             </h2>
             
             <div v-if="loading" class="text-center py-12">
