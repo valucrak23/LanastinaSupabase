@@ -77,8 +77,10 @@ export async function upsertUserProfile(userId, email, nombre = null, apellido =
     // verificar si el perfil ya existe
     try {
         const existingProfile = await getUserProfile(userId);
+        console.log('[users.js] Perfil existente encontrado:', existingProfile);
         return existingProfile; // Retorna perfil existente sin modificarlo
     } catch (error) {
+        console.log('[users.js] Perfil no existe, creando nuevo perfil para:', userId);
         // perfil no existe, crear uno nuevo
     }
     
@@ -105,6 +107,20 @@ export async function upsertUserProfile(userId, email, nombre = null, apellido =
 
     if (error) {
         console.error('[users.js upsertUserProfile] Error al crear el perfil: ', error);
+        
+        // Si es error de clave duplicada, intentar obtener el perfil existente
+        if (error.code === '23505' || error.message.includes('duplicate key')) {
+            console.log('[users.js] Clave duplicada detectada, obteniendo perfil existente...');
+            try {
+                const existingProfile = await getUserProfile(userId);
+                console.log('[users.js] Perfil existente obtenido después de error:', existingProfile);
+                return existingProfile;
+            } catch (getError) {
+                console.error('[users.js] Error al obtener perfil existente:', getError);
+                throw new Error(error.message); // Lanzar el error original si no se puede obtener el perfil
+            }
+        }
+        
         throw new Error(error.message);
     }
 

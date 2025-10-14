@@ -39,12 +39,21 @@ export default {
                 this.loading = true;
                 this.successMessage = '';
 
-                await createPost({
-                    perfil_id: this.user.id,
-                    titulo: this.post.titulo,
-                    descripcion: this.post.descripcion,
-                    imagen_url: this.post.imagen_url || null,
-                });
+                // Validar que el usuario esté autenticado
+                if (!this.user.id) {
+                    await this.show('Error', 'Debes estar autenticado para crear una publicación', 'error');
+                    this.loading = false;
+                    return;
+                }
+
+                console.log('[CreatePost] Creando publicación con perfil_id:', this.user.id);
+
+                await createPost(
+                    this.post.titulo,
+                    this.post.descripcion,
+                    this.post.imagen_url || null,
+                    this.user.id
+                );
 
                 this.successMessage = '¡Publicación creada con éxito!';
                 
@@ -67,7 +76,10 @@ export default {
     },
     mounted() {
         // suscribirse al estado de autenticacion
-        subscribeToAuthStateChanges(newUserState => this.user = newUserState);
+        subscribeToAuthStateChanges(newUserState => {
+            console.log('[CreatePost] Usuario recibido:', newUserState);
+            this.user = newUserState;
+        });
     },
 }
 </script>

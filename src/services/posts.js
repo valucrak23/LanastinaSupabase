@@ -30,6 +30,7 @@ export async function fetchAllPosts() {
             total_likes: post.likes ? post.likes.length : 0
         }))
 
+
         return postsWithLikes
     } catch (error) {
         console.error('Error in fetchAllPosts:', error)

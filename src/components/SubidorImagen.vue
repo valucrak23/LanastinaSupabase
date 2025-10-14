@@ -5,8 +5,9 @@ export default {
   name: 'SubidorImagen',
   props: {
     userId: {
-      type: String,
-      required: true
+      type: [String, null],
+      required: false,
+      default: null
     },
     carpeta: {
       type: String,
