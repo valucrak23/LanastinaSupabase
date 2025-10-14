@@ -1,3 +1,4 @@
+// EXTRA: composable para manejar tags de usuarios @usuario
 import { ref } from 'vue';
 import { getUserByUsername } from '../services/users';
 

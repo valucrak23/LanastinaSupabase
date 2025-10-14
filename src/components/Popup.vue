@@ -1,3 +1,4 @@
+<!-- EXTRA: componente popup personalizado para reemplazar alert() y confirm() -->
 <template>
   <div v-if="show" class="popup-overlay" @click="close">
     <div class="popup-content" @click.stop>

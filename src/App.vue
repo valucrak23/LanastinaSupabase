@@ -1,4 +1,5 @@
 <script>
+// imports necesarios para la app principal
 import { logout, subscribeToAuthStateChanges } from './services/auth';
 import Popup from './components/Popup.vue';
 import { usePopup } from './composables/usePopup';
@@ -12,26 +13,32 @@ export default {
     },
     data() {
         return {
+            // datos del usuario logueado
             user: {
                 id: null,
                 email: null,
             },
+            // control del menu mobile
             showMobileMenu: false
         }
     },
     methods: {
+        // cerrar sesion y redirigir al login
         handleLogout() {
             logout();
             this.$router.push('/ingresar');
         },
+        // mostrar/ocultar menu mobile
         toggleMobileMenu() {
             this.showMobileMenu = !this.showMobileMenu;
         },
+        // cerrar menu mobile
         closeMobileMenu() {
             this.showMobileMenu = false;
         },
     },
     mounted() {
+        // escuchar cambios en el estado de autenticacion
         subscribeToAuthStateChanges(newUserState => this.user = newUserState);
     }
 }

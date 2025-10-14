@@ -1,4 +1,5 @@
 <script>
+// imports para la pagina principal
 import AppH1 from '../components/AppH1.vue';
 import UserTag from '../components/UserTag.vue';
 import { fetchAllPosts, subscribeToNewPosts } from '../services/posts';

@@ -1,3 +1,4 @@
+// EXTRA: servicio para reportar publicaciones y usuarios
 import { supabase } from "./supabase";
 
 export async function reportPost(postId, reporterId, reason) {

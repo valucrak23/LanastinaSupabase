@@ -71,23 +71,32 @@ npm run dev
 ## Funcionalidades Principales
 
 ### Autenticación
-- Registro de usuarios con email y contraseña
+- Registro de usuarios con email, contraseña y username personalizado
 - Inicio de sesión
 - Cierre de sesión
 - Protección de rutas privadas mediante Navigation Guards
 
 ### Publicaciones
-- Crear publicaciones con título, descripción e imagen (URL)
+- Crear publicaciones con título, descripción e imagen (subida directa)
 - Ver feed de todas las publicaciones ordenadas por fecha
-- Actualización en tiempo real al crear nuevas publicaciones
+- Sistema de likes con contador en tiempo real
+- Menciones de usuarios con @usuario (tags clickeables)
 - Eliminar publicaciones propias
 - Ver publicaciones por usuario
 
 ### Perfiles
-- Perfil personalizado con nombre para mostrar y biografía
-- Edición del perfil propio
+- Perfil personalizado con nombre, apellido, biografía y foto
+- Edición del perfil propio (nombre, apellido, biografía, intereses)
+- Sistema de intereses/tags para categorizar usuarios
 - Visualización de perfiles de otros usuarios
 - Listado de publicaciones por usuario
+
+### Funcionalidades Extra
+- Sistema de reportes para publicaciones y usuarios
+- Funciones de administrador (eliminar publicaciones de otros)
+- Popups personalizados (reemplazo de alert/confirm nativos)
+- Diseño responsive con tema "crochet master"
+- Subida de imágenes con validación
 
 ## Base de Datos
 
@@ -151,8 +160,9 @@ npm run dev
 
 ## Datos de Usuarios Creados
 - **admin**: lanastina@gmail.com | admin123
-- ana.tejedora@gmail.com | ana123
-- carlos.crochet@email.com | carlos123
-- maria.amigurumi@email.com | maria123
-- luis.circular@email.com | luis123
-- sofia.macrame@email.com | sofia123
+- ana.tejedora@gmail.com         | ana123
+- carlos.crochet@email.com       | carlos123
+- maria.amigurumi@email.com      | maria123
+- luis.circular@email.com        | luis123
+- sofia.macrame@email.com        | sofia123
+- agostina.lalana@gmail.com      | agos123

@@ -1,3 +1,4 @@
+<!-- EXTRA: componente para mostrar tags de usuarios @usuario como links -->
         <template>
             <RouterLink 
                 v-if="userId" 

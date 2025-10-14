@@ -1,12 +1,16 @@
+// imports para manejo de autenticacion
 import { supabase } from "./supabase";
 import { upsertUserProfile } from "./users";
 
+// estado global del usuario
 let user = {
     id: null,
     email: null,
 }
+// lista de funciones que escuchan cambios de auth
 let observers = [];
 
+// registrar nuevo usuario
 export async function register(email, password, username = null) {
     console.log('[auth.js] Intentando registrar usuario:', email);
     

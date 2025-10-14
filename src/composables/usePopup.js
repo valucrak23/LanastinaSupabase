@@ -1,3 +1,4 @@
+// EXTRA: composable para manejar popups personalizados
 import { ref } from 'vue'
 
 const showPopup = ref(false)
