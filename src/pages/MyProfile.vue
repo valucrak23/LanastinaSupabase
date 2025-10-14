@@ -2,7 +2,7 @@
 import AppH1 from '../components/AppH1.vue';
 import SubidorImagen from '../components/SubidorImagen.vue';
 import UserTag from '../components/UserTag.vue';
-import { subscribeToAuthStateChanges } from '../services/auth';
+import { subscribeToAuthStateChanges, changePassword } from '../services/auth';
 import { getUserProfile, updateUserProfile } from '../services/users';
 import { fetchUserPosts, deletePost } from '../services/posts';
 import { fetchAllIntereses, fetchUserIntereses, updateUserIntereses } from '../services/intereses';
@@ -36,6 +36,14 @@ export default {
             loading: true,
             editing: false,
             saving: false,
+            // cambio de contraseña
+            showPasswordForm: false,
+            passwordData: {
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            },
+            changingPassword: false,
             // Intereses
             allIntereses: [],
             userIntereses: [],
@@ -243,6 +251,63 @@ export default {
             }
         });
     },
+
+    methods: {
+        // mostrar formulario de cambio de contraseña
+        showChangePassword() {
+            this.showPasswordForm = true;
+            this.passwordData = {
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            };
+        },
+
+        // cancelar cambio de contraseña
+        cancelChangePassword() {
+            this.showPasswordForm = false;
+            this.passwordData = {
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            };
+        },
+
+        // cambiar contraseña
+        async handleChangePassword() {
+            try {
+                // validaciones
+                if (!this.passwordData.newPassword) {
+                    await this.show('Error', 'La nueva contraseña es requerida', 'error');
+                    return;
+                }
+
+                if (this.passwordData.newPassword.length < 6) {
+                    await this.show('Error', 'La contraseña debe tener al menos 6 caracteres', 'error');
+                    return;
+                }
+
+                if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
+                    await this.show('Error', 'Las contraseñas no coinciden', 'error');
+                    return;
+                }
+
+                this.changingPassword = true;
+
+                // cambiar contraseña
+                await changePassword(this.passwordData.newPassword);
+
+                await this.show('Éxito', 'Contraseña cambiada correctamente', 'success');
+                this.cancelChangePassword();
+
+            } catch (error) {
+                console.error('Error al cambiar contraseña:', error);
+                await this.show('Error', error.message, 'error');
+            } finally {
+                this.changingPassword = false;
+            }
+        }
+    },
 }
 </script>
 
@@ -335,12 +400,21 @@ export default {
                 </div>
             </div>
             
-            <button 
-                @click="enableEditing"
-                class="px-6 py-3 rounded-lg bg-crochet-violeta hover:bg-crochet-turquesa text-white font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-                ✏️ Editar perfil
-            </button>
+            <div class="flex gap-4">
+                <button 
+                    @click="enableEditing"
+                    class="px-6 py-3 rounded-lg bg-crochet-violeta hover:bg-crochet-turquesa text-white font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
+                    ✏️ Editar perfil
+                </button>
+                
+                <button 
+                    @click="showChangePassword"
+                    class="px-6 py-3 rounded-lg bg-crochet-rosa hover:bg-crochet-verde text-white font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
+                    🔒 Cambiar contraseña
+                </button>
+            </div>
         </div>
 
         <form v-else @submit.prevent="saveProfile">
@@ -522,6 +596,65 @@ export default {
                 </button>
             </div>
         </article>
+
+        <!-- Modal de cambio de contraseña -->
+        <div v-if="showPasswordForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="cancelChangePassword">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl" @click.stop>
+                <h3 class="text-2xl font-bold text-crochet-text mb-6">🔒 Cambiar Contraseña</h3>
+                
+                <form @submit.prevent="handleChangePassword">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-crochet-text-secondary mb-2">
+                            Nueva contraseña
+                        </label>
+                        <input
+                            v-model="passwordData.newPassword"
+                            type="password"
+                            required
+                            minlength="6"
+                            class="w-full px-4 py-2 border-2 border-crochet-violeta/30 rounded-lg focus:outline-none focus:border-crochet-turquesa"
+                            placeholder="Mínimo 6 caracteres"
+                        >
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-crochet-text-secondary mb-2">
+                            Confirmar contraseña
+                        </label>
+                        <input
+                            v-model="passwordData.confirmPassword"
+                            type="password"
+                            required
+                            minlength="6"
+                            class="w-full px-4 py-2 border-2 border-crochet-violeta/30 rounded-lg focus:outline-none focus:border-crochet-turquesa"
+                            placeholder="Repite la contraseña"
+                        >
+                    </div>
+
+                    <p class="text-sm text-crochet-text-muted mb-6">
+                        ⚠️ Solo puedes cambiar tu contraseña una vez por semana
+                    </p>
+
+                    <div class="flex gap-4">
+                        <button
+                            type="submit"
+                            :disabled="changingPassword"
+                            class="flex-1 px-6 py-3 rounded-lg bg-crochet-violeta hover:bg-crochet-turquesa text-white font-bold transition-all duration-300 disabled:opacity-50"
+                        >
+                            {{ changingPassword ? 'Cambiando...' : 'Cambiar contraseña' }}
+                        </button>
+                        <button
+                            type="button"
+                            @click="cancelChangePassword"
+                            :disabled="changingPassword"
+                            class="flex-1 px-6 py-3 rounded-lg bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold transition-all duration-300 disabled:opacity-50"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </section>
 </template>
 

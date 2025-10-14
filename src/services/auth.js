@@ -97,6 +97,92 @@ export function getCurrentUser() {
     return user;
 }
 
+// cambiar contraseña con limite de una vez por semana
+export async function changePassword(newPassword) {
+    try {
+        // verificar si puede cambiar contraseña (una vez por semana)
+        const canChange = await canChangePasswordThisWeek();
+        if (!canChange.allowed) {
+            throw new Error(`Debes esperar hasta ${canChange.nextAllowedDate} para cambiar tu contraseña nuevamente`);
+        }
+
+        // cambiar contraseña en supabase
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (error) {
+            console.error('[auth.js] Error al cambiar contraseña:', error);
+            throw new Error(error.message);
+        }
+
+        // registrar el cambio de contraseña
+        await recordPasswordChange();
+        
+        return { success: true };
+    } catch (error) {
+        console.error('[auth.js] Error en changePassword:', error);
+        throw error;
+    }
+}
+
+// verificar si puede cambiar contraseña esta semana
+async function canChangePasswordThisWeek() {
+    try {
+        const { data, error } = await supabase
+            .from('cambios_contraseña')
+            .select('fecha_cambio')
+            .eq('perfil_id', user.id)
+            .order('fecha_cambio', { ascending: false })
+            .limit(1);
+
+        if (error) {
+            console.error('[auth.js] Error al verificar cambios de contraseña:', error);
+            return { allowed: true }; // permitir si hay error en la consulta
+        }
+
+        if (!data || data.length === 0) {
+            return { allowed: true }; // nunca ha cambiado contraseña
+        }
+
+        const lastChange = new Date(data[0].fecha_cambio);
+        const now = new Date();
+        const daysDiff = Math.floor((now - lastChange) / (1000 * 60 * 60 * 24));
+
+        if (daysDiff >= 7) {
+            return { allowed: true };
+        } else {
+            const nextAllowedDate = new Date(lastChange);
+            nextAllowedDate.setDate(nextAllowedDate.getDate() + 7);
+            return { 
+                allowed: false, 
+                nextAllowedDate: nextAllowedDate.toLocaleDateString('es-ES')
+            };
+        }
+    } catch (error) {
+        console.error('[auth.js] Error en canChangePasswordThisWeek:', error);
+        return { allowed: true }; // permitir si hay error
+    }
+}
+
+// registrar cambio de contraseña
+async function recordPasswordChange() {
+    try {
+        const { error } = await supabase
+            .from('cambios_contraseña')
+            .insert({
+                perfil_id: user.id,
+                fecha_cambio: new Date().toISOString()
+            });
+
+        if (error) {
+            console.error('[auth.js] Error al registrar cambio de contraseña:', error);
+        }
+    } catch (error) {
+        console.error('[auth.js] Error en recordPasswordChange:', error);
+    }
+}
+
 // manejar errores de refresh token silenciosamente
 supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'TOKEN_REFRESHED' && !session) {
