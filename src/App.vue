@@ -148,7 +148,7 @@ export default {
                                         to="/" 
                                         @click="closeMobileMenu"
                                         class="block px-4 py-3 rounded-lg text-crochet-violeta hover:text-black hover:bg-crochet-violeta transition-all duration-300 font-medium"
-                                    >🏠 Inicio</RouterLink>
+                                    >🧶 Inicio</RouterLink>
                                 </li>
             <template v-if="user.id === null">
                                     <li>
@@ -156,14 +156,14 @@ export default {
                                             to="/ingresar" 
                                             @click="closeMobileMenu"
                                             class="block px-4 py-3 rounded-lg text-crochet-violeta hover:text-black hover:bg-crochet-violeta transition-all duration-300 font-medium"
-                                        >🔑 Ingresar</RouterLink>
+                                        >🗝Ingresar</RouterLink>
                                     </li>
                                     <li>
                                         <RouterLink 
                                             to="/crear-cuenta" 
                                             @click="closeMobileMenu"
                                             class="block px-4 py-3 rounded-lg tejido-accent transition-all duration-300 font-medium text-center"
-                                        >✨ Crear cuenta</RouterLink>
+                                        >⚡Crear cuenta</RouterLink>
                                     </li>
             </template>
             <template v-else>
