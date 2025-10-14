@@ -234,14 +234,74 @@ export default {
             if (!this.user.id || !post.likes) return false;
             return post.likes.some(like => like.perfil_id === this.user.id);
         },
+
+        // cargar todos los intereses disponibles
+        async loadAllIntereses() {
+            try {
+                this.allIntereses = await fetchAllIntereses();
+            } catch (error) {
+                console.error('Error al cargar intereses:', error);
+                this.allIntereses = [];
+            }
+        },
+
+        // cargar intereses del usuario
+        async loadUserIntereses() {
+            try {
+                if (this.user.id) {
+                    this.userIntereses = await fetchUserIntereses(this.user.id);
+                }
+            } catch (error) {
+                console.error('Error al cargar intereses del usuario:', error);
+                this.userIntereses = [];
+            }
+        },
+
+        // cargar perfil del usuario
+        async loadProfile() {
+            try {
+                console.log('[MyProfile] Cargando perfil para usuario:', this.user.id);
+                if (this.user.id) {
+                    this.profile = await getUserProfile(this.user.id);
+                    console.log('[MyProfile] Perfil cargado:', this.profile);
+                }
+            } catch (error) {
+                console.error('Error al cargar perfil:', error);
+                this.profile = {
+                    nombre: '',
+                    apellido: '',
+                    username: '',
+                    edad: null,
+                    descripcion: '',
+                    foto_perfil_url: null,
+                };
+            }
+        },
+
+        // cargar publicaciones del usuario
+        async loadPosts() {
+            try {
+                if (this.user.id) {
+                    this.posts = await fetchUserPosts(this.user.id);
+                }
+            } catch (error) {
+                console.error('Error al cargar publicaciones:', error);
+                this.posts = [];
+            } finally {
+                this.loading = false;
+            }
+        },
         
     },
     async mounted() {
+        console.log('[MyProfile] Componente montado, usuario actual:', this.user);
+        
         // cargar todos los intereses disponibles
         await this.loadAllIntereses();
         
         // suscribirse al estado de autenticacion
         subscribeToAuthStateChanges(async (newUserState) => {
+            console.log('[MyProfile] Estado de auth cambiado:', newUserState);
             this.user = newUserState;
             
             if (this.user.id) {
@@ -250,6 +310,14 @@ export default {
                 await this.loadPosts();
             }
         });
+
+        // cargar datos iniciales si ya hay usuario
+        if (this.user.id) {
+            console.log('[MyProfile] Cargando datos iniciales para usuario:', this.user.id);
+            await this.loadProfile();
+            await this.loadUserIntereses();
+            await this.loadPosts();
+        }
     },
 
     methods: {
@@ -598,13 +666,13 @@ export default {
         </article>
 
         <!-- Modal de cambio de contraseña -->
-        <div v-if="showPasswordForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="cancelChangePassword">
-            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl" @click.stop>
-                <h3 class="text-2xl font-bold text-crochet-text mb-6">🔒 Cambiar Contraseña</h3>
+        <div v-if="showPasswordForm" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50" @click="cancelChangePassword">
+            <div class="crochet-card p-8 max-w-md w-full mx-4 shadow-2xl border-2 border-crochet-violeta/50" @click.stop>
+                <h3 class="text-2xl font-bold text-crochet-text mb-6 text-center">🔒 Cambiar Contraseña</h3>
                 
                 <form @submit.prevent="handleChangePassword">
                     <div class="mb-4">
-                        <label class="block text-sm font-semibold text-crochet-text-secondary mb-2">
+                        <label class="block text-sm font-semibold text-crochet-text mb-2">
                             Nueva contraseña
                         </label>
                         <input
@@ -612,13 +680,13 @@ export default {
                             type="password"
                             required
                             minlength="6"
-                            class="w-full px-4 py-2 border-2 border-crochet-violeta/30 rounded-lg focus:outline-none focus:border-crochet-turquesa"
+                            class="crochet-input w-full"
                             placeholder="Mínimo 6 caracteres"
                         >
                     </div>
 
                     <div class="mb-6">
-                        <label class="block text-sm font-semibold text-crochet-text-secondary mb-2">
+                        <label class="block text-sm font-semibold text-crochet-text mb-2">
                             Confirmar contraseña
                         </label>
                         <input
@@ -626,12 +694,12 @@ export default {
                             type="password"
                             required
                             minlength="6"
-                            class="w-full px-4 py-2 border-2 border-crochet-violeta/30 rounded-lg focus:outline-none focus:border-crochet-turquesa"
+                            class="crochet-input w-full"
                             placeholder="Repite la contraseña"
                         >
                     </div>
 
-                    <p class="text-sm text-crochet-text-muted mb-6">
+                    <p class="text-sm text-crochet-text-muted mb-6 text-center bg-crochet-rosa/20 p-3 rounded-lg border border-crochet-rosa/30">
                         ⚠️ Solo puedes cambiar tu contraseña una vez por semana
                     </p>
 
@@ -639,7 +707,7 @@ export default {
                         <button
                             type="submit"
                             :disabled="changingPassword"
-                            class="flex-1 px-6 py-3 rounded-lg bg-crochet-violeta hover:bg-crochet-turquesa text-white font-bold transition-all duration-300 disabled:opacity-50"
+                            class="btn-turquesa flex-1"
                         >
                             {{ changingPassword ? 'Cambiando...' : 'Cambiar contraseña' }}
                         </button>
@@ -647,7 +715,7 @@ export default {
                             type="button"
                             @click="cancelChangePassword"
                             :disabled="changingPassword"
-                            class="flex-1 px-6 py-3 rounded-lg bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold transition-all duration-300 disabled:opacity-50"
+                            class="btn-rosa flex-1"
                         >
                             Cancelar
                         </button>
