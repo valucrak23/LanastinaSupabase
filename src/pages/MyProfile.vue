@@ -9,6 +9,7 @@ import { fetchAllIntereses, fetchUserIntereses, updateUserIntereses } from '../s
 import { darLike, quitarLike, verificarLike } from '../services/likes';
 import { usePopup } from '../composables/usePopup';
 import { useUserTags } from '../composables/useUserTags';
+import { useRouter } from 'vue-router';
 
 export default {
     name: 'MyProfile',
@@ -16,7 +17,8 @@ export default {
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();
-        return { show, splitText };
+        const router = useRouter();
+        return { show, splitText, router };
     },
     data() {
         return {
@@ -290,8 +292,7 @@ export default {
             } finally {
                 this.loading = false;
             }
-        },
-        
+        }
     },
     async mounted() {
         console.log('[MyProfile] Componente montado, usuario actual:', this.user);
@@ -317,6 +318,9 @@ export default {
             await this.loadProfile();
             await this.loadUserIntereses();
             await this.loadPosts();
+        } else {
+            console.log('[MyProfile] No hay usuario autenticado, redirigiendo al login...');
+            this.router.push('/ingresar');
         }
     },
 
