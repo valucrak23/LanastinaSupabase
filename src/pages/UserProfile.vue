@@ -185,7 +185,7 @@ export default {
 
 <template>
     <div v-if="loading" class="text-center py-8">
-        <p class="text-gray-600">Cargando perfil...</p>
+        <p class="text-crochet-text-secondary">Cargando perfil...</p>
     </div>
 
     <div v-else-if="error" class="text-center py-8">
@@ -208,44 +208,44 @@ export default {
             </div>
             <div>
                 <h1 class="text-3xl font-bold text-pink-900 mb-1">@{{ profile.username }}</h1>
-                <p class="text-xl text-gray-700">{{ profile.nombre }}{{ profile.apellido ? ' ' + profile.apellido : '' }}</p>
+                <p class="text-xl text-crochet-text-primary">{{ profile.nombre }}{{ profile.apellido ? ' ' + profile.apellido : '' }}</p>
             </div>
         </div>
 
-        <section class="mb-8 p-6 border-2 border-pink-200 rounded-lg bg-white">
+        <section class="mb-8 p-6 border-2 border-crochet-violeta/30 rounded-lg bg-crochet-bg-secondary">
             <div class="flex justify-between items-center mb-3">
-                <h2 class="text-xl font-semibold text-pink-800">Sobre este usuario</h2>
+                <h2 class="text-xl font-semibold text-crochet-text-primary">Sobre este usuario</h2>
                 <button 
-                    v-if="user.id && user.id !== profile.perfil_id && !isAdmin"
+                    v-if="user.id && user.id !== profile.perfil_id"
                     @click="reportUser"
-                    class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition"
+                    class="px-3 py-1 rounded bg-crochet-rosa hover:bg-crochet-violeta text-white text-sm font-medium transition"
                 >
                     🚨 Reportar usuario
                 </button>
             </div>
             
             <div class="mb-3">
-                <p class="text-sm font-semibold text-gray-600">Nombre</p>
+                <p class="text-sm font-semibold text-crochet-text-secondary">Nombre</p>
                 <p class="text-lg">{{ profile.nombre }}{{ profile.apellido ? ' ' + profile.apellido : '' }}</p>
             </div>
             
             <div class="mb-3">
-                <p class="text-sm font-semibold text-gray-600">Email</p>
+                <p class="text-sm font-semibold text-crochet-text-secondary">Email</p>
                 <p class="text-lg">{{ profile.email }}</p>
             </div>
             
             <div v-if="profile.edad" class="mb-3">
-                <p class="text-sm font-semibold text-gray-600">Edad</p>
+                <p class="text-sm font-semibold text-crochet-text-secondary">Edad</p>
                 <p class="text-lg">{{ profile.edad }} años</p>
             </div>
             
             <div v-if="profile.descripcion" class="mb-3">
-                <p class="text-sm font-semibold text-gray-600">Descripción</p>
+                <p class="text-sm font-semibold text-crochet-text-secondary">Descripción</p>
                 <p class="text-lg">{{ profile.descripcion }}</p>
             </div>
             
             <div class="mb-3">
-                <p class="text-sm font-semibold text-gray-600 mb-2">Intereses</p>
+                <p class="text-sm font-semibold text-crochet-text-secondary mb-2">Intereses</p>
                 
                 <!-- Mostrar intereses si existen -->
                 <div v-if="userIntereses.length > 0" class="flex flex-wrap gap-2">
@@ -253,7 +253,7 @@ export default {
                     <span
                         v-for="interes in displayedIntereses"
                         :key="interes.interes_id"
-                        class="px-3 py-1 rounded-full bg-pink-100 text-pink-800 text-sm font-medium border border-pink-200 hover:bg-pink-200 transition-colors"
+                        class="px-3 py-1 rounded-full bg-crochet-bg-card text-crochet-text-primary text-sm font-medium border border-crochet-violeta/30 hover:bg-crochet-bg-hover transition-colors"
                     >
                         {{ interes.icono }} {{ interes.nombre }}
                     </span>
@@ -262,7 +262,7 @@ export default {
                     <button
                         v-if="userIntereses.length > 3 && !showAllIntereses"
                         @click="showAllIntereses = true"
-                        class="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm font-medium border border-gray-200 hover:bg-gray-200 transition-colors flex items-center gap-1"
+                        class="px-3 py-1 rounded-full bg-crochet-bg-card text-crochet-text-secondary text-sm font-medium border border-crochet-violeta/30 hover:bg-crochet-bg-hover transition-colors flex items-center gap-1"
                     >
                         +{{ userIntereses.length - 3 }}
                     </button>
@@ -271,37 +271,37 @@ export default {
                     <button
                         v-if="showAllIntereses && userIntereses.length > 3"
                         @click="showAllIntereses = false"
-                        class="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm font-medium border border-gray-200 hover:bg-gray-200 transition-colors"
+                        class="px-3 py-1 rounded-full bg-crochet-bg-card text-crochet-text-secondary text-sm font-medium border border-crochet-violeta/30 hover:bg-crochet-bg-hover transition-colors"
                     >
                         −
                     </button>
                 </div>
                 
                 <!-- Mensaje cuando no hay intereses -->
-                <div v-else class="text-gray-500 text-sm">
+                <div v-else class="text-crochet-text-muted text-sm">
                     <p>Este usuario no tiene intereses seleccionados</p>
                 </div>
             </div>
         </section>
 
         <section>
-            <h2 class="text-2xl font-semibold text-pink-800 mb-4">
+            <h2 class="text-2xl font-semibold text-crochet-text-primary mb-4">
                 Publicaciones de @{{ profile.username }}
             </h2>
             
-            <div v-if="posts.length === 0" class="text-center py-8 p-6 border-2 border-pink-200 rounded-lg bg-pink-50">
-                <p class="text-gray-600">Este usuario aún no tiene publicaciones</p>
+            <div v-if="posts.length === 0" class="text-center py-8 p-6 border-2 border-crochet-violeta/30 rounded-lg bg-crochet-bg-secondary">
+                <p class="text-crochet-text-secondary">Este usuario aún no tiene publicaciones</p>
             </div>
 
             <article 
                 v-else
                 v-for="post in posts"
                 :key="post.publicacion_id"
-                class="mb-6 p-6 border-2 border-pink-200 rounded-lg bg-white shadow-sm hover:shadow-md transition"
+                class="mb-6 p-6 border-2 border-crochet-violeta/30 rounded-lg bg-crochet-bg-secondary shadow-sm hover:shadow-md transition"
             >
                 <header class="mb-4">
                     <h3 class="text-xl font-bold text-pink-900 mb-2">{{ post.titulo }}</h3>
-                    <time :datetime="post.created_at" class="text-sm text-gray-600">
+                    <time :datetime="post.created_at" class="text-sm text-crochet-text-muted">
                         {{ formatDate(post.created_at) }}
                     </time>
                 </header>
@@ -313,7 +313,7 @@ export default {
                     class="w-full aspect-square object-cover rounded-lg mb-4 max-w-md mx-auto"
                 >
                 
-                <div class="text-gray-800 whitespace-pre-wrap mb-4">
+                <div class="text-crochet-text-secondary whitespace-pre-wrap mb-4">
                     <span v-for="(part, index) in splitText(post.descripcion)" :key="index">
                         <UserTag v-if="part.startsWith('@')" :tag="part" />
                         <span v-else>{{ part }}</span>
@@ -321,14 +321,14 @@ export default {
                 </div>
                 
                 <!-- Botones de Like, Reportar y Eliminar -->
-                <div class="flex items-center justify-between pt-4 border-t border-pink-100">
+                <div class="flex items-center justify-between pt-4">
                     <button 
                         @click="toggleLike(post)"
                         :class="[
                             'flex items-center gap-2 px-3 py-2 rounded-full transition',
                             hasUserLiked(post) 
-                                ? 'bg-pink-100 text-pink-700 border-2 border-pink-300' 
-                                : 'bg-gray-100 text-gray-600 border-2 border-gray-200 hover:bg-pink-50 hover:text-pink-600'
+                                ? 'bg-crochet-rosa text-white border-2 border-crochet-rosa' 
+                                : 'bg-crochet-bg-card text-crochet-text-secondary border-2 border-crochet-violeta/30 hover:bg-crochet-bg-hover hover:text-crochet-text-primary'
                         ]"
                     >
                         <span class="text-lg">{{ hasUserLiked(post) ? '❤️' : '🤍' }}</span>
@@ -338,9 +338,9 @@ export default {
                     <div class="flex gap-2">
                         <!-- Botón de reportar (para usuarios no admin) -->
                         <button 
-                            v-if="user.id && user.id !== profile.perfil_id && !isAdmin"
+                            v-if="user.id && user.id !== profile.perfil_id"
                             @click="reportPost(post)"
-                            class="px-3 py-2 rounded bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition"
+                            class="px-3 py-2 rounded bg-crochet-turquesa hover:bg-crochet-violeta text-white text-sm font-medium transition"
                         >
                             🚨 Reportar
                         </button>
@@ -349,7 +349,7 @@ export default {
                         <button 
                             v-if="isAdmin"
                             @click="deletePostAsAdmin(post)"
-                            class="px-3 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition"
+                            class="px-3 py-2 rounded bg-crochet-violeta hover:bg-crochet-rosa text-white text-sm font-medium transition"
                         >
                             🗑️ Eliminar
                         </button>

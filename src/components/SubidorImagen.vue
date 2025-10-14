@@ -85,7 +85,7 @@ export default {
       <button 
         type="button"
         @click="limpiarImagen"
-        class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+        class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition disabled:bg-crochet-bg-card disabled:cursor-not-allowed"
         :disabled="subiendo"
       >
         ✕ Quitar imagen
@@ -109,7 +109,7 @@ export default {
     </div>
 
     <p v-if="error" class="mt-2 text-red-600 text-sm">{{ error }}</p>
-    <p class="mt-2 text-gray-600 text-xs">JPG, PNG, GIF o WEBP. Máximo 5MB.</p>
+    <p class="mt-2 text-crochet-text-muted text-xs">JPG, PNG, GIF o WEBP. Máximo 5MB.</p>
   </div>
 </template>
 
@@ -129,24 +129,31 @@ export default {
 .upload-container {
   text-align: center;
   padding: 2rem;
-  border: 2px dashed #ec4899;
-  border-radius: 8px;
-  background: #fdf2f8;
+  border: 2px dashed var(--violeta-vivo);
+  border-radius: 16px;
+  background: var(--bg-card);
+  transition: all 0.3s ease;
+}
+
+.upload-container:hover {
+  border-color: var(--turquesa-vivo);
+  background: var(--bg-hover);
 }
 
 .upload-label {
   display: inline-block;
   padding: 1rem 2rem;
-  background: #ec4899;
+  background: var(--violeta-vivo);
   color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
 }
 
 .upload-label:hover {
-  background: #db2777;
+  background: var(--turquesa-vivo);
+  transform: translateY(-2px);
 }
 
 .file-input {

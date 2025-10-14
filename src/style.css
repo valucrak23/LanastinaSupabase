@@ -1,43 +1,101 @@
 @import "tailwindcss";
 
-/* Tema girly oscuro - Turquesa y Lila */
+/* Tema crochet master - Colores vivos y acogedores */
 :root {
-  --bg-primary: #0f172a;        /* dark-900 */
-  --bg-secondary: #1e293b;      /* dark-800 */
-  --bg-card: #334155;           /* dark-700 */
-  --text-primary: #f8fafc;      /* dark-50 */
-  --text-secondary: #cbd5e1;    /* dark-300 */
-  --accent-primary: #0ea5e9;    /* primary-500 turquesa */
-  --accent-secondary: #a855f7;  /* secondary-500 lila */
-  --accent-pink: #ec4899;       /* accent-500 rosa */
+  /* Fondos tipo Dracula pero más suaves */
+  --bg-primary: #1a1b26;        /* fondo principal */
+  --bg-secondary: #24283b;      /* cards y elementos */
+  --bg-card: #2d3748;           /* cards más claros */
+  --bg-hover: #353a52;          /* hover states */
+  
+  /* Textos suaves */
+  --text-primary: #f8f8f2;      /* texto principal */
+  --text-secondary: #a9b1d6;    /* texto secundario */
+  --text-muted: #565f89;        /* texto deshabilitado */
+  
+  /* Colores crochet vivos */
+  --turquesa-vivo: #26d0ce;     /* turquesa brillante */
+  --violeta-vivo: #bb9af7;      /* violeta suave */
+  --rosa-vivo: #f7768e;         /* rosa vibrante */
+  --amarillo-vivo: #e0af68;     /* amarillo dorado */
+  --verde-vivo: #9ece6a;        /* verde menta */
+  --azul-vivo: #7aa2f7;         /* azul cielo */
+  
+  /* Sombras suaves */
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 20px rgba(187, 154, 247, 0.3);
 }
 
 body {
-  background-color: var(--bg-primary);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, #2a2d3a 100%);
   color: var(--text-primary);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
 }
 
-/* Estilos personalizados para elementos girly */
-.girly-gradient {
-  background: var(--accent-secondary);
+/* Efectos crochet master */
+.crochet-glow {
+  box-shadow: var(--shadow-glow);
 }
 
-.girly-text {
-  color: var(--accent-secondary);
+.crochet-card {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(187, 154, 247, 0.2);
+  transition: all 0.3s ease;
 }
 
-.girly-shadow {
-  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
+.crochet-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  border-color: var(--violeta-vivo);
 }
 
-.girly-border {
-  border: 2px solid var(--accent-secondary);
+.crochet-input {
+  background: var(--bg-card);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.crochet-input:focus {
+  border-color: var(--turquesa-vivo);
+  box-shadow: 0 0 0 3px rgba(38, 208, 206, 0.1);
+  outline: none;
+}
+
+.crochet-button {
+  background: linear-gradient(135deg, var(--violeta-vivo) 0%, var(--turquesa-vivo) 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.crochet-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(187, 154, 247, 0.4);
+}
+
+.crochet-button:active {
+  transform: translateY(0);
+}
+
+/* Efectos de lana */
+.lana-texture {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(187, 154, 247, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(38, 208, 206, 0.1) 0%, transparent 50%);
 }
 
 /* Animaciones suaves */
 * {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Scrollbar personalizado */
@@ -47,13 +105,152 @@ body {
 
 ::-webkit-scrollbar-track {
   background: var(--bg-secondary);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent-primary);
+  background: linear-gradient(135deg, var(--violeta-vivo), var(--turquesa-vivo));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-secondary);
+  background: linear-gradient(135deg, var(--turquesa-vivo), var(--rosa-vivo));
+}
+
+/* Efectos especiales - Más color sin degradados */
+.hero-glow {
+  background: var(--violeta-vivo);
+  opacity: 0.1;
+}
+
+.nav-glow {
+  background: var(--bg-primary);
+  border-bottom: 2px solid var(--violeta-vivo);
+}
+
+/* Elementos con más color de tejido */
+.tejido-accent {
+  background: var(--violeta-vivo);
+  color: white;
+}
+
+.tejido-accent:hover {
+  background: var(--turquesa-vivo);
+  color: white;
+}
+
+.tejido-secondary {
+  background: var(--turquesa-vivo);
+  color: white;
+}
+
+.tejido-secondary:hover {
+  background: var(--violeta-vivo);
+  color: white;
+}
+
+.tejido-rosa {
+  background: var(--rosa-vivo);
+  color: white;
+}
+
+.tejido-rosa:hover {
+  background: var(--violeta-vivo);
+  color: white;
+}
+
+/* Efectos de botones especiales */
+.btn-turquesa {
+  background: var(--turquesa-vivo);
+  color: white;
+}
+
+.btn-turquesa:hover {
+  background: #1fb5b3;
+  box-shadow: 0 0 20px rgba(38, 208, 206, 0.4);
+}
+
+.btn-violeta {
+  background: var(--violeta-vivo);
+  color: white;
+}
+
+.btn-violeta:hover {
+  background: #a88de6;
+  box-shadow: 0 0 20px rgba(187, 154, 247, 0.4);
+}
+
+.btn-rosa {
+  background: var(--rosa-vivo);
+  color: white;
+}
+
+.btn-rosa:hover {
+  background: #f55a7a;
+  box-shadow: 0 0 20px rgba(247, 118, 142, 0.4);
+}
+
+/* Colores directos para asegurar que se vean - Más transparentes */
+.bg-crochet-turquesa {
+  background-color: rgba(38, 208, 206, 0.8) !important;
+}
+
+.bg-crochet-violeta {
+  background-color: rgba(187, 154, 247, 0.8) !important;
+}
+
+.bg-crochet-rosa {
+  background-color: rgba(247, 118, 142, 0.8) !important;
+}
+
+.text-crochet-turquesa {
+  color: #26d0ce !important;
+}
+
+.text-crochet-violeta {
+  color: #bb9af7 !important;
+}
+
+.text-crochet-rosa {
+  color: #f7768e !important;
+}
+
+.border-crochet-turquesa {
+  border-color: #26d0ce !important;
+}
+
+.border-crochet-violeta {
+  border-color: #bb9af7 !important;
+}
+
+.border-crochet-rosa {
+  border-color: #f7768e !important;
+}
+
+.hover\:bg-crochet-turquesa:hover {
+  background-color: rgba(38, 208, 206, 0.8) !important;
+}
+
+.hover\:bg-crochet-violeta:hover {
+  background-color: rgba(187, 154, 247, 0.8) !important;
+}
+
+.hover\:bg-crochet-rosa:hover {
+  background-color: rgba(247, 118, 142, 0.8) !important;
+}
+
+.hover\:border-crochet-turquesa:hover {
+  border-color: #26d0ce !important;
+}
+
+.hover\:border-crochet-violeta:hover {
+  border-color: #bb9af7 !important;
+}
+
+.hover\:border-crochet-rosa:hover {
+  border-color: #f7768e !important;
+}
+
+.hover\:text-black:hover {
+  color: #000000 !important;
 }

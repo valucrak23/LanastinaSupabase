@@ -7,7 +7,7 @@ let user = {
 }
 let observers = [];
 
-export async function register(email, password) {
+export async function register(email, password, username = null) {
     console.log('[auth.js] Intentando registrar usuario:', email);
     
     const { data, error } = await supabase
@@ -31,7 +31,7 @@ export async function register(email, password) {
     // Intentar crear perfil, pero no fallar si hay error
     if (data.user) {
         try {
-            await upsertUserProfile(data.user.id, data.user.email);
+            await upsertUserProfile(data.user.id, data.user.email, null, '', username);
             console.log("[auth.js] Perfil creado exitosamente");
         } catch (profileError) {
             console.warn("[auth.js] Error al crear perfil, pero usuario registrado:", profileError.message);

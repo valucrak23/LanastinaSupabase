@@ -1,15 +1,15 @@
-<template>
-    <RouterLink 
-        v-if="userId" 
-        :to="`/usuario/${userId}`"
-        class="text-secondary-400 hover:text-secondary-300 font-semibold transition"
-    >
-        {{ tag }}
-    </RouterLink>
-    <span v-else class="text-secondary-400 font-semibold">
-        {{ tag }}
-    </span>
-</template>
+        <template>
+            <RouterLink 
+                v-if="userId" 
+                :to="`/usuario/${userId}`"
+                class="text-crochet-turquesa hover:text-crochet-rosa font-bold transition-colors duration-300 hover:underline bg-crochet-bg-card px-2 py-1 rounded-full border border-crochet-turquesa/30 hover:border-crochet-rosa hover:bg-crochet-violeta/20"
+            >
+                {{ tag }}
+            </RouterLink>
+            <span v-else class="text-crochet-text-muted font-semibold bg-crochet-bg-card px-2 py-1 rounded-full border border-crochet-text-muted/30">
+                {{ tag }}
+            </span>
+        </template>
 
 <script>
 import { ref, onMounted } from 'vue';

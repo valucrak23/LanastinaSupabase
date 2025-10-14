@@ -7,54 +7,77 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Paleta girly oscura - Turquesa y Lila
+        // Paleta crochet master - Colores vivos
+        crochet: {
+          // Fondos Dracula suaves
+          bg: {
+            primary: '#1a1b26',
+            secondary: '#24283b',
+            card: '#2d3748',
+            hover: '#353a52',
+          },
+          // Textos suaves
+          text: {
+            primary: '#f8f8f2',
+            secondary: '#a9b1d6',
+            muted: '#565f89',
+          },
+          // Colores vivos
+          turquesa: '#26d0ce',
+          violeta: '#bb9af7',
+          rosa: '#f7768e',
+          amarillo: '#e0af68',
+          verde: '#9ece6a',
+          azul: '#7aa2f7',
+        },
+        // Compatibilidad con clases existentes
         primary: {
-          50: '#f0f9ff',   // turquesa muy claro
+          50: '#f0f9ff',
           100: '#e0f2fe',
           200: '#bae6fd',
           300: '#7dd3fc',
-          400: '#38bdf8',  // turquesa claro
-          500: '#0ea5e9',  // turquesa principal
-          600: '#0284c7',  // turquesa medio
-          700: '#0369a1',  // turquesa oscuro
-          800: '#075985',  // turquesa muy oscuro
-          900: '#0c4a6e',  // turquesa super oscuro
+          400: '#38bdf8',
+          500: '#26d0ce',  // turquesa vivo
+          600: '#1fb5b3',
+          700: '#1a9b99',
+          800: '#158180',
+          900: '#0f6766',
         },
         secondary: {
-          50: '#faf5ff',   // lila muy claro
+          50: '#faf5ff',
           100: '#f3e8ff',
           200: '#e9d5ff',
           300: '#d8b4fe',
-          400: '#c084fc',  // lila claro
-          500: '#a855f7',  // lila principal
-          600: '#9333ea',  // lila medio
-          700: '#7c3aed',  // lila oscuro
-          800: '#6b21a8',  // lila muy oscuro
-          900: '#581c87',  // lila super oscuro
+          400: '#c084fc',
+          500: '#bb9af7',  // violeta vivo
+          600: '#a88de6',
+          700: '#957fd5',
+          800: '#8271c4',
+          900: '#6f63b3',
         },
         accent: {
-          50: '#fdf2f8',   // rosa muy claro
+          50: '#fdf2f8',
           100: '#fce7f3',
           200: '#fbcfe8',
           300: '#f9a8d4',
-          400: '#f472b6',  // rosa claro
-          500: '#ec4899',  // rosa principal
-          600: '#db2777',  // rosa medio
-          700: '#be185d',  // rosa oscuro
-          800: '#9d174d',  // rosa muy oscuro
-          900: '#831843',  // rosa super oscuro
+          400: '#f472b6',
+          500: '#f7768e',  // rosa vivo
+          600: '#f55a7a',
+          700: '#f33e66',
+          800: '#f12252',
+          900: '#ef063e',
         },
         dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
+          50: '#f8f8f2',
+          100: '#a9b1d6',
+          200: '#565f89',
+          300: '#353a52',
+          400: '#2d3748',
+          500: '#24283b',
+          600: '#1e2130',
+          700: '#1a1b26',
+          800: '#161820',
+          900: '#12141a',
         }
       }
     },

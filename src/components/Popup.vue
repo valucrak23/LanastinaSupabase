@@ -100,7 +100,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 20px 20px 0 20px;
-  border-bottom: 1px solid #e5e7eb;
+  /* border-bottom: 1px solid #e5e7eb; */
 }
 
 .popup-title {

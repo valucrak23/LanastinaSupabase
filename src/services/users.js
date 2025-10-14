@@ -71,7 +71,7 @@ export async function updateUserProfile(userId, updates) {
     return data;
 }
 
-export async function upsertUserProfile(userId, email, nombre = null, apellido = '') {
+export async function upsertUserProfile(userId, email, nombre = null, apellido = '', username = null) {
     const emailUsername = email.split('@')[0];
     
     // verificar si el perfil ya existe
@@ -83,7 +83,8 @@ export async function upsertUserProfile(userId, email, nombre = null, apellido =
     }
     
     // generar username limpio sin caracteres especiales
-    const cleanUsername = await generateUniqueUsername(emailUsername);
+    const baseUsername = username || emailUsername;
+    const cleanUsername = await generateUniqueUsername(baseUsername);
     
     // crear perfil si no existe
     const nombreFinal = nombre || emailUsername;

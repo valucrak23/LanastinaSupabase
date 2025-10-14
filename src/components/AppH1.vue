@@ -1,3 +1,5 @@
-<template>
-    <h1 class="mb-4 text-3xl text-dark-100 font-bold"><slot /></h1>
-</template>
+        <template>
+            <h1 class="mb-6 text-4xl text-crochet-text-primary font-bold">
+                <slot />
+            </h1>
+        </template>
