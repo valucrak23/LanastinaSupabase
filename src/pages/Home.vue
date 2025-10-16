@@ -1,6 +1,5 @@
 <script>
 // imports para la pagina principal
-import AppH1 from '../components/AppH1.vue';
 import UserTag from '../components/UserTag.vue';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
 import { fetchAllPosts, subscribeToNewPosts } from '../services/posts';
@@ -11,7 +10,7 @@ import { useUserTags } from '../composables/useUserTags';
 
 export default {
     name: 'Home',
-    components: { AppH1, UserTag, SkeletonLoader },
+    components: { UserTag, SkeletonLoader },
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();

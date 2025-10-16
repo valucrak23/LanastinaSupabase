@@ -1,16 +1,15 @@
 <script>
-import AppH1 from '../components/AppH1.vue';
 import { login } from '../services/auth';
 
 export default {
     name: 'Login',
-    components: { AppH1, },
     data() {
         return {
             loading: false,
             user: {
                 email: '',
                 password: '',
+                remember: true,
             },
         }
     },
@@ -59,7 +58,7 @@ export default {
                         >
                     </div>
                     
-                    <div class="mb-8">
+                    <div class="mb-6">
                         <label for="password" class="block mb-3 font-semibold text-crochet-text-primary text-lg">
                             🔒 Contraseña
                         </label>
@@ -71,6 +70,34 @@ export default {
                             required
                             placeholder="Tu contraseña"
                         >
+                    </div>
+                    
+                    <div class="mb-8">
+                        <div class="flex items-center justify-center">
+                            <div class="relative">
+                                <input
+                                    type="checkbox"
+                                    id="remember"
+                                    v-model="user.remember"
+                                    class="sr-only"
+                                >
+                                <label 
+                                    for="remember" 
+                                    class="flex items-center cursor-pointer group"
+                                >
+                                    <div class="relative">
+                                        <div class="w-6 h-6 bg-gray-100 rounded-md transition-all duration-300 group-hover:bg-crochet-violeta/20 group-hover:shadow-lg group-hover:shadow-crochet-violeta/20" :class="{ 'bg-crochet-violeta': user.remember }">
+                                            <div v-if="user.remember" class="absolute inset-0 flex items-center justify-center">
+                                                <div class="w-4 h-4 bg-white rounded-md transform rotate-45 shadow-sm"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="ml-3 text-crochet-text-secondary text-sm font-medium group-hover:text-crochet-violeta transition-colors duration-300">
+                                        🧶 Recordarme (sesión persistente)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                     
                     <button 
@@ -102,3 +129,49 @@ export default {
             </div>
         </div>
     </template>
+
+<style scoped>
+/* Estilos personalizados para el checkbox */
+.group:hover .w-6 {
+    transform: scale(1.05);
+}
+
+.group:active .w-6 {
+    transform: scale(0.95);
+}
+
+/* Animación suave para el checkmark */
+.w-3 {
+    animation: checkmark-appear 0.2s ease-out;
+}
+
+@keyframes checkmark-appear {
+    0% {
+        opacity: 0;
+        transform: rotate(45deg) scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: rotate(45deg) scale(1);
+    }
+}
+
+/* Efecto de brillo en hover */
+.group:hover .w-6::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent, rgba(187, 154, 247, 0.15), transparent);
+    border-radius: inherit;
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+</style>

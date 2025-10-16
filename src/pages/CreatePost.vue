@@ -1,5 +1,4 @@
 <script>
-import AppH1 from '../components/AppH1.vue';
 import SubidorImagen from '../components/SubidorImagen.vue';
 import { createPost } from '../services/posts';
 import { subscribeToAuthStateChanges } from '../services/auth';
@@ -7,7 +6,7 @@ import { usePopup } from '../composables/usePopup';
 
 export default {
     name: 'CreatePost',
-    components: { AppH1, SubidorImagen },
+    components: { SubidorImagen },
     setup() {
         const { show } = usePopup();
         return { show };

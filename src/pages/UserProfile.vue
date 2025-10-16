@@ -1,5 +1,4 @@
 <script>
-import AppH1 from '../components/AppH1.vue';
 import UserTag from '../components/UserTag.vue';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
 import { getUserProfile } from '../services/users';
@@ -14,7 +13,7 @@ import { deletePost } from '../services/posts';
 
 export default {
     name: 'UserProfile',
-    components: { AppH1, UserTag, SkeletonLoader },
+    components: { UserTag, SkeletonLoader },
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();

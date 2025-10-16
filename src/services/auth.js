@@ -10,6 +10,11 @@ let user = {
 // lista de funciones que escuchan cambios de auth
 let observers = [];
 
+// configuración de timeout de inactividad (30 minutos)
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutos en ms
+let inactivityTimer = null;
+let lastActivity = Date.now();
+
 // registrar nuevo usuario
 export async function register(email, password, username = null) {
     const { data, error } = await supabase
@@ -65,22 +70,44 @@ export async function login(email, password) {
         id: data.user.id,
         email: data.user.email,
     }
+    
+    console.log('[auth.js login] Usuario logueado:', user);
+    
+    // iniciar timer de inactividad
+    startInactivityTimer();
     notifyAll();
 }
 
 export async function logout() {
-    const { error } = await supabase.auth.signOut();
-    
-    if(error) {
-        console.error('[auth.js logout] Error al cerrar sesión: ', error);
-        throw new Error(error.message);
+    try {
+        console.log('[auth.js] Iniciando logout...');
+        
+        // limpiar timer de inactividad primero
+        clearInactivityTimer();
+        
+        // cerrar sesión en Supabase
+        const { error } = await supabase.auth.signOut();
+        
+        if(error) {
+            console.error('[auth.js logout] Error al cerrar sesión: ', error);
+            throw new Error(error.message);
+        }
+        
+        console.log('[auth.js] Logout exitoso');
+        
+        // limpiar estado local
+        user = {
+            id: null,
+            email: null,
+        }
+        
+        // notificar a todos los observadores
+        notifyAll();
+        
+    } catch (error) {
+        console.error('[auth.js] Error en logout:', error);
+        throw error;
     }
-    
-    user = {
-        id: null,
-        email: null,
-    }
-    notifyAll();
 }
 
 export function subscribeToAuthStateChanges(callback) {
@@ -93,9 +120,103 @@ function notifyAll() {
     observers.forEach(callback => callback(user));
 }
 
+// notificar con flag de inactividad
+function notifyAllWithInactivity() {
+    observers.forEach(callback => callback({ ...user, inactivityLogout: true }));
+}
+
 export function getCurrentUser() {
     return user;
 }
+
+// inicializar sesión persistente
+export async function initializeAuth() {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session && session.user) {
+            user = {
+                id: session.user.id,
+                email: session.user.email,
+            };
+            console.log('[auth.js] Sesión restaurada, iniciando timer de inactividad');
+            startInactivityTimer();
+            notifyAll();
+        } else {
+            console.log('[auth.js] No hay sesión activa');
+        }
+    } catch (error) {
+        console.error('[auth.js] Error al inicializar sesión:', error);
+    }
+}
+
+// manejar actividad del usuario
+export function updateActivity() {
+    console.log('[auth.js] updateActivity llamada, usuario:', user.id);
+    if (user.id) {
+        lastActivity = Date.now();
+        resetInactivityTimer();
+        console.log('[auth.js] Actividad detectada, timer reseteado');
+    } else {
+        console.log('[auth.js] No hay usuario logueado, ignorando actividad');
+    }
+}
+
+// iniciar timer de inactividad
+function startInactivityTimer() {
+    lastActivity = Date.now();
+    console.log('[auth.js] Timer de inactividad iniciado');
+    resetInactivityTimer();
+}
+
+// resetear timer de inactividad
+function resetInactivityTimer() {
+    clearInactivityTimer();
+    
+    inactivityTimer = setTimeout(() => {
+        console.log('[auth.js] Sesión expirada por inactividad después de', INACTIVITY_TIMEOUT / 1000, 'segundos');
+        handleInactivityLogout();
+    }, INACTIVITY_TIMEOUT);
+    
+    console.log('[auth.js] Timer reseteado, expira en', INACTIVITY_TIMEOUT / 1000, 'segundos');
+}
+
+// manejar logout por inactividad
+async function handleInactivityLogout() {
+    try {
+        // limpiar timer de inactividad
+        clearInactivityTimer();
+        
+        // cerrar sesión en Supabase
+        const { error } = await supabase.auth.signOut();
+        
+        if(error) {
+            console.error('[auth.js] Error al cerrar sesión por inactividad:', error);
+        }
+        
+        // actualizar estado local
+        user = {
+            id: null,
+            email: null,
+        }
+        
+        // notificar con flag de inactividad
+        notifyAllWithInactivity();
+        
+    } catch (error) {
+        console.error('[auth.js] Error en handleInactivityLogout:', error);
+    }
+}
+
+// limpiar timer de inactividad
+function clearInactivityTimer() {
+    if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = null;
+        console.log('[auth.js] Timer limpiado');
+    }
+}
+
 
 
 // cambiar contraseña (solo una vez por semana)
@@ -194,18 +315,27 @@ async function recordPasswordChange() {
     }
 }
 
-// manejar errores de refresh token silenciosamente
+// manejar cambios de estado de autenticación
 supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'TOKEN_REFRESHED' && !session) {
-        // si el refresh falla, limpiar usuario sin mostrar error
-        user = { id: null, email: null };
-        notifyAll();
-    } else if (event === 'SIGNED_IN' && session) {
-        // usuario se autenticó
+    console.log('[auth.js] Auth state change:', event, session ? 'con sesión' : 'sin sesión');
+    
+    if (event === 'SIGNED_IN' && session) {
         user = {
             id: session.user.id,
             email: session.user.email,
         };
+        console.log('[auth.js] Usuario autenticado, iniciando timer');
+        startInactivityTimer();
+        notifyAll();
+    } else if (event === 'SIGNED_OUT') {
+        console.log('[auth.js] Usuario deslogueado, limpiando estado');
+        clearInactivityTimer();
+        user = { id: null, email: null };
+        notifyAll();
+    } else if (event === 'TOKEN_REFRESHED' && !session) {
+        console.log('[auth.js] Token refresh falló, limpiando estado');
+        clearInactivityTimer();
+        user = { id: null, email: null };
         notifyAll();
     }
 });

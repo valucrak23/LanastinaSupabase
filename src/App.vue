@@ -1,6 +1,6 @@
 <script>
 // imports necesarios para la app principal
-import { logout, subscribeToAuthStateChanges } from './services/auth';
+import { logout, subscribeToAuthStateChanges, initializeAuth, updateActivity } from './services/auth';
 import Popup from './components/Popup.vue';
 import { usePopup } from './composables/usePopup';
 
@@ -24,9 +24,14 @@ export default {
     },
     methods: {
         // cerrar sesion y redirigir al login
-        handleLogout() {
-            logout();
-            this.$router.push('/ingresar');
+        async handleLogout() {
+            try {
+                await logout();
+                console.log('[App.vue] Logout exitoso, redirigiendo...');
+                this.$router.push('/ingresar');
+            } catch (error) {
+                console.error('[App.vue] Error en logout:', error);
+            }
         },
         // mostrar/ocultar menu mobile
         toggleMobileMenu() {
@@ -36,10 +41,52 @@ export default {
         closeMobileMenu() {
             this.showMobileMenu = false;
         },
+        // configurar detección de actividad
+        setupActivityDetection() {
+            const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+            
+            console.log('[App.vue] Configurando detección de actividad con eventos:', events);
+            
+            events.forEach(event => {
+                document.addEventListener(event, updateActivity, true);
+                console.log('[App.vue] Event listener añadido para:', event);
+            });
+        },
+        // mostrar popup de inactividad
+        showInactivityPopup() {
+            this.showPopup(
+                'Sesión Expirada',
+                'Tu sesión se cerró por inactividad. Por favor, inicia sesión nuevamente.',
+                'info'
+            );
+        },
+        // mostrar popup de ya logueado
+        showAlreadyLoggedInPopup() {
+            this.showPopup(
+                'Ya estás logueada',
+                'Ya tienes una sesión activa. Puedes continuar navegando normalmente.',
+                'info'
+            );
+        }
     },
-    mounted() {
+    async mounted() {
+        // inicializar sesión persistente
+        await initializeAuth();
+        
         // escuchar cambios en el estado de autenticacion
-        subscribeToAuthStateChanges(newUserState => this.user = newUserState);
+        subscribeToAuthStateChanges(newUserState => {
+            this.user = newUserState;
+            
+            // mostrar popup si fue logout por inactividad
+            if (newUserState.inactivityLogout) {
+                this.showInactivityPopup();
+            }
+        });
+        
+        
+        // detectar actividad del usuario
+        this.setupActivityDetection();
+        
     }
 }
 </script>

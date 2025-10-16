@@ -1,5 +1,4 @@
 <script>
-import AppH1 from '../components/AppH1.vue';
 import SubidorImagen from '../components/SubidorImagen.vue';
 import UserTag from '../components/UserTag.vue';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
@@ -13,7 +12,7 @@ import { useUserTags } from '../composables/useUserTags';
 
 export default {
     name: 'MyProfile',
-    components: { AppH1, SubidorImagen, UserTag, SkeletonLoader },
+    components: { SubidorImagen, UserTag, SkeletonLoader },
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();
