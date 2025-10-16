@@ -2,6 +2,7 @@
 // imports para la pagina principal
 import AppH1 from '../components/AppH1.vue';
 import UserTag from '../components/UserTag.vue';
+import SkeletonLoader from '../components/SkeletonLoader.vue';
 import { fetchAllPosts, subscribeToNewPosts } from '../services/posts';
 import { darLike, quitarLike, verificarLike } from '../services/likes';
 import { subscribeToAuthStateChanges } from '../services/auth';
@@ -10,7 +11,7 @@ import { useUserTags } from '../composables/useUserTags';
 
 export default {
     name: 'Home',
-    components: { AppH1, UserTag },
+    components: { AppH1, UserTag, SkeletonLoader },
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();
@@ -131,9 +132,8 @@ export default {
                 Publicaciones recientes
             </h2>
             
-            <div v-if="loading" class="text-center py-12">
-                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-crochet-violeta"></div>
-                <p class="text-crochet-text-secondary mt-4">Cargando publicaciones...</p>
+            <div v-if="loading" class="max-w-2xl mx-auto">
+                <SkeletonLoader type="post-list" :count="3" />
             </div>
 
             <div v-else-if="posts.length === 0" class="text-center py-12">

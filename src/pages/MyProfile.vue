@@ -2,6 +2,7 @@
 import AppH1 from '../components/AppH1.vue';
 import SubidorImagen from '../components/SubidorImagen.vue';
 import UserTag from '../components/UserTag.vue';
+import SkeletonLoader from '../components/SkeletonLoader.vue';
 import { subscribeToAuthStateChanges, changePassword } from '../services/auth';
 import { getUserProfile, updateUserProfile } from '../services/users';
 import { fetchUserPosts, deletePost } from '../services/posts';
@@ -12,7 +13,7 @@ import { useUserTags } from '../composables/useUserTags';
 
 export default {
     name: 'MyProfile',
-    components: { AppH1, SubidorImagen, UserTag },
+    components: { AppH1, SubidorImagen, UserTag, SkeletonLoader },
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();
@@ -314,8 +315,13 @@ export default {
 </script>
 
 <template>
+    <!-- Skeleton para perfil mientras carga -->
+    <div v-if="loading && !user.id" class="mb-8">
+        <SkeletonLoader type="profile" />
+    </div>
+
     <!-- Header con foto de perfil -->
-    <div class="flex items-center gap-6 mb-8">
+    <div v-else class="flex items-center gap-6 mb-8">
         <div class="foto-perfil-container">
             <img 
                 v-if="profile.foto_perfil_url" 
@@ -534,8 +540,8 @@ export default {
     <section>
         <h2 class="text-2xl font-semibold text-crochet-text-primary mb-4">Mis publicaciones</h2>
         
-        <div v-if="loading" class="text-center py-8">
-            <p class="text-crochet-text-secondary">Cargando publicaciones...</p>
+        <div v-if="loading" class="max-w-2xl mx-auto">
+            <SkeletonLoader type="post-list" :count="2" />
         </div>
 
         <div v-else-if="posts.length === 0" class="text-center py-8 p-6 border-2 border-crochet-violeta/30 rounded-lg bg-crochet-bg-card">

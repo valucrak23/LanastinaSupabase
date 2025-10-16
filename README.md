@@ -19,7 +19,11 @@ Lanastina es una red social temática dedicada al tejido, donde los usuarios pue
 ```
 src/
 ├── components/          # Componentes reutilizables
-│   └── AppH1.vue       # Componente de encabezado
+│   ├── AppH1.vue       # Componente de encabezado
+│   ├── SkeletonLoader.vue # Componente de skeleton loading
+│   ├── Popup.vue       # Componente de popup personalizado
+│   ├── SubidorImagen.vue # Componente para subir imágenes
+│   └── UserTag.vue     # Componente para tags de usuarios
 ├── pages/              # Vistas/Páginas de la aplicación
 │   ├── Home.vue        # Página principal con feed de publicaciones
 │   ├── Login.vue       # Página de inicio de sesión
@@ -97,6 +101,7 @@ npm run dev
 - Popups personalizados (reemplazo de alert/confirm nativos)
 - Diseño responsive con tema "crochet master"
 - Subida de imágenes con validación
+- Sistema de skeleton loading sutil para mejorar la experiencia de usuario
 
 ## Base de Datos
 

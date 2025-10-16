@@ -1,6 +1,7 @@
 <script>
 import AppH1 from '../components/AppH1.vue';
 import UserTag from '../components/UserTag.vue';
+import SkeletonLoader from '../components/SkeletonLoader.vue';
 import { getUserProfile } from '../services/users';
 import { fetchUserPosts } from '../services/posts';
 import { fetchUserIntereses } from '../services/intereses';
@@ -13,7 +14,7 @@ import { deletePost } from '../services/posts';
 
 export default {
     name: 'UserProfile',
-    components: { AppH1, UserTag },
+    components: { AppH1, UserTag, SkeletonLoader },
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();
@@ -184,8 +185,8 @@ export default {
 </script>
 
 <template>
-    <div v-if="loading" class="text-center py-8">
-        <p class="text-crochet-text-secondary">Cargando perfil...</p>
+    <div v-if="loading" class="max-w-2xl mx-auto">
+        <SkeletonLoader type="profile" />
     </div>
 
     <div v-else-if="error" class="text-center py-8">
