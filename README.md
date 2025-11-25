@@ -142,26 +142,10 @@ npm run dev
 - `perfil_id` (UUID, FK) - Referencia al usuario
 - `interes_id` (UUID, FK) - Referencia al interés
 
-#### `reportes_publicaciones`
-- `reporte_id` (UUID, PK) - Identificador único del reporte
-- `publicacion_id` (UUID, FK) - Referencia al post reportado
-- `reporter_id` (UUID, FK) - Referencia al usuario que reporta
-- `razon` (text) - Motivo del reporte
-- `created_at` (timestamp) - Fecha del reporte
-
-#### `reportes_usuarios`
-- `reporte_id` (UUID, PK) - Identificador único del reporte
-- `usuario_reportado_id` (UUID, FK) - Referencia al usuario reportado
-- `reporter_id` (UUID, FK) - Referencia al usuario que reporta
-- `razon` (text) - Motivo del reporte
-- `created_at` (timestamp) - Fecha del reporte
-
 ### Relaciones
 - Un usuario puede tener muchas publicaciones (1:N)
 - Un usuario puede dar like a muchas publicaciones (N:M)
 - Un usuario puede tener muchos intereses (N:M)
-- Un usuario puede reportar muchas publicaciones (1:N)
-- Un usuario puede ser reportado muchas veces (1:N)
 
 ## Datos de Usuarios Creados
 - **admin**: lanastina@gmail.com | admin123
