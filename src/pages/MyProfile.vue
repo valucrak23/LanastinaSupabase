@@ -2,9 +2,10 @@
 import SubidorImagen from '../components/SubidorImagen.vue';
 import UserTag from '../components/UserTag.vue';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
+import Comentarios from '../components/Comentarios.vue';
 import { subscribeToAuthStateChanges, changePassword } from '../services/auth';
 import { getUserProfile, updateUserProfile } from '../services/users';
-import { fetchUserPosts, deletePost } from '../services/posts';
+import { fetchUserPosts, deletePost, subscribeToPostsChanges } from '../services/posts';
 import { fetchAllIntereses, fetchUserIntereses, updateUserIntereses } from '../services/intereses';
 import { darLike, quitarLike, verificarLike } from '../services/likes';
 import { usePopup } from '../composables/usePopup';
@@ -12,7 +13,7 @@ import { useUserTags } from '../composables/useUserTags';
 
 export default {
     name: 'MyProfile',
-    components: { SubidorImagen, UserTag, SkeletonLoader },
+    components: { SubidorImagen, UserTag, SkeletonLoader, Comentarios },
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();
@@ -48,6 +49,8 @@ export default {
             allIntereses: [],
             userIntereses: [],
             showAllIntereses: false,
+            postsSubscription: null,
+            postsSubscription: null,
         }
     },
     computed: {
@@ -169,10 +172,15 @@ export default {
             return dateFormatter.format(date);
         },
         async loadProfile() {
-            if (!this.user.id) return;
+            if (!this.user.id) {
+                console.warn('[MyProfile.vue] No hay user.id, no se puede cargar el perfil');
+                return;
+            }
             
             try {
+                console.log('[MyProfile.vue] Intentando cargar perfil para usuario:', this.user.id);
                 const profileData = await getUserProfile(this.user.id);
+                console.log('[MyProfile.vue] Perfil cargado exitosamente:', profileData);
                 
                 // Asignar datos al componente
                 this.profile = {
@@ -185,6 +193,7 @@ export default {
                 };
             } catch (error) {
                 console.error('[MyProfile.vue] Error al cargar el perfil: ', error);
+                await this.show('Error', 'No se pudo cargar tu perfil. Verificá la consola del navegador para más detalles.');
             }
         },
         async loadPosts() {
@@ -307,8 +316,40 @@ export default {
                 await this.loadProfile();
                 await this.loadUserIntereses();
                 await this.loadPosts();
+                
+                // suscribirse a cambios en tiempo real de publicaciones
+                if (this.postsSubscription) {
+                    this.postsSubscription.unsubscribe();
+                }
+                
+                this.postsSubscription = subscribeToPostsChanges(
+                    (newPost) => {
+                        if (newPost.perfil_id === this.user.id) {
+                            const exists = this.posts.some(p => p.publicacion_id === newPost.publicacion_id);
+                            if (!exists) {
+                                this.posts.unshift(newPost);
+                            }
+                        }
+                    },
+                    (updatedPost) => {
+                        if (updatedPost.perfil_id === this.user.id) {
+                            const index = this.posts.findIndex(p => p.publicacion_id === updatedPost.publicacion_id);
+                            if (index !== -1) {
+                                this.posts[index] = updatedPost;
+                            }
+                        }
+                    },
+                    (deletedPostId) => {
+                        this.posts = this.posts.filter(p => p.publicacion_id !== deletedPostId);
+                    }
+                );
             }
         });
+    },
+    beforeUnmount() {
+        if (this.postsSubscription) {
+            this.postsSubscription.unsubscribe();
+        }
     },
 }
 </script>
@@ -580,8 +621,8 @@ export default {
                 </span>
             </div>
             
-            <!-- Botón de Like y Eliminar -->
-            <div class="flex items-center justify-between pt-4">
+            <!-- Botón de Like, Editar y Eliminar -->
+            <div class="flex items-center justify-between gap-2 pt-4">
                 <button 
                     @click="toggleLike(post)"
                     :class="[
@@ -595,13 +636,26 @@ export default {
                     <span class="font-medium">{{ post.total_likes || 0 }} {{ (post.total_likes || 0) === 1 ? 'like' : 'likes' }}</span>
                 </button>
                 
-                <button 
-                    @click="handleDeletePost(post.publicacion_id)"
-                    class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition"
-                >
-                    Eliminar
-                </button>
+                <div class="flex gap-2">
+                    <RouterLink
+                        :to="`/editar/${post.publicacion_id}`"
+                        class="px-4 py-2 rounded bg-crochet-turquesa hover:bg-crochet-violeta text-white text-sm font-semibold transition transform hover:scale-105"
+                        title="Editar publicación"
+                    >
+                        ✏️ Editar
+                    </RouterLink>
+                    
+                    <button 
+                        @click="handleDeletePost(post.publicacion_id)"
+                        class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition transform hover:scale-105"
+                    >
+                        🗑️ Eliminar
+                    </button>
+                </div>
             </div>
+            
+            <!-- Comentarios -->
+            <Comentarios :publicacion-id="post.publicacion_id" :user="user" />
         </article>
 
         <!-- Modal de cambio de contraseña -->

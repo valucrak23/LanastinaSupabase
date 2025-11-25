@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../pages/Home.vue';
 import CreatePost from '../pages/CreatePost.vue';
+import EditPost from '../pages/EditPost.vue';
 import Login from '../pages/Login.vue';
 import Register from '../pages/Register.vue';
 import { subscribeToAuthStateChanges } from '../services/auth';
@@ -15,6 +16,7 @@ const routes = [
     { path: '/ingresar',        component: Login, },
     { path: '/crear-cuenta',    component: Register, },
     { path: '/publicar',        component: CreatePost,  meta: { requiresAuth: true, }, },
+    { path: '/editar/:id',      component: EditPost,    meta: { requiresAuth: true, }, },
     { path: '/mi-perfil',       component: MyProfile,   meta: { requiresAuth: true, }, },
     { path: '/usuario/:id',     component: UserProfile, },
     { path: '/:pathMatch(.*)*', component: NotFound, }, // Ruta catch-all para 404

@@ -66,6 +66,18 @@ CREATE TABLE likes (
   UNIQUE(publicacion_id, perfil_id)
 );
 
+-- 6. COMENTARIOS
+CREATE TABLE comentarios (
+  comentario_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  publicacion_id UUID NOT NULL REFERENCES publicaciones(publicacion_id) ON DELETE CASCADE,
+  perfil_id UUID NOT NULL REFERENCES perfiles(perfil_id) ON DELETE CASCADE,
+  contenido TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_comentarios_publicacion ON comentarios(publicacion_id);
+CREATE INDEX idx_comentarios_perfil ON comentarios(perfil_id);
+
 -- FUNCIONES
 CREATE OR REPLACE FUNCTION obtener_iniciales(perfil_id UUID)
 RETURNS TEXT AS $$
@@ -112,6 +124,7 @@ ORDER BY p.created_at DESC;
 ALTER TABLE perfiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE publicaciones ENABLE ROW LEVEL SECURITY;
 ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comentarios ENABLE ROW LEVEL SECURITY;
 
 -- PERFILES
 CREATE POLICY "Todos pueden ver perfiles públicos (excepto admins)" 
@@ -163,4 +176,17 @@ CREATE POLICY "Los usuarios autenticados pueden dar like"
 
 CREATE POLICY "Los usuarios pueden quitar su propio like" 
   ON likes FOR DELETE 
+  USING (auth.uid() = perfil_id);
+
+-- COMENTARIOS
+CREATE POLICY "Todos pueden ver los comentarios" 
+  ON comentarios FOR SELECT 
+  USING (true);
+
+CREATE POLICY "Los usuarios autenticados pueden crear comentarios" 
+  ON comentarios FOR INSERT 
+  WITH CHECK (auth.uid() = perfil_id);
+
+CREATE POLICY "Los usuarios pueden eliminar sus propios comentarios" 
+  ON comentarios FOR DELETE 
   USING (auth.uid() = perfil_id);

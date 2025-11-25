@@ -2,7 +2,8 @@
 // imports para la pagina principal
 import UserTag from '../components/UserTag.vue';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
-import { fetchAllPosts, subscribeToNewPosts } from '../services/posts';
+import Comentarios from '../components/Comentarios.vue';
+import { fetchAllPosts, subscribeToPostsChanges } from '../services/posts';
 import { darLike, quitarLike, verificarLike } from '../services/likes';
 import { subscribeToAuthStateChanges } from '../services/auth';
 import { usePopup } from '../composables/usePopup';
@@ -10,7 +11,7 @@ import { useUserTags } from '../composables/useUserTags';
 
 export default {
     name: 'Home',
-    components: { UserTag, SkeletonLoader },
+    components: { UserTag, SkeletonLoader, Comentarios },
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();
@@ -24,6 +25,7 @@ export default {
                 id: null,
                 email: null,
             },
+            postsSubscription: null,
         }
     },
     methods: {
@@ -77,7 +79,21 @@ export default {
         },
         // obtiene nombre del usuario
         getUserDisplayName(post) {
-            return post.perfiles?.username || post.perfiles?.nombre || post.perfiles?.email || 'Usuario desconocido';
+            if (post.perfiles) {
+                if (post.perfiles.username) return post.perfiles.username;
+                if (post.perfiles.nombre) {
+                    const nombre = post.perfiles.nombre;
+                    const apellido = post.perfiles.apellido || '';
+                    return apellido ? `${nombre} ${apellido}` : nombre;
+                }
+                if (post.perfiles.email) return post.perfiles.email.split('@')[0];
+            }
+            
+            if (post.perfil_id) {
+                return `Usuario ${post.perfil_id.substring(0, 8)}`;
+            }
+            
+            return 'Usuario desconocido';
         },
         
     },
@@ -86,10 +102,27 @@ export default {
             // cargar publicaciones
             this.posts = await fetchAllPosts();
             
-            // suscribirse a nuevas publicaciones
-            subscribeToNewPosts((newPost) => {
-                this.posts.unshift(newPost);
-            });
+            // suscribirse a cambios en tiempo real de publicaciones
+            this.postsSubscription = subscribeToPostsChanges(
+                (newPost) => {
+                    // Agregar nueva publicación al inicio
+                    const exists = this.posts.some(p => p.publicacion_id === newPost.publicacion_id);
+                    if (!exists) {
+                        this.posts.unshift(newPost);
+                    }
+                },
+                (updatedPost) => {
+                    // Actualizar publicación existente
+                    const index = this.posts.findIndex(p => p.publicacion_id === updatedPost.publicacion_id);
+                    if (index !== -1) {
+                        this.posts[index] = updatedPost;
+                    }
+                },
+                (deletedPostId) => {
+                    // Eliminar publicación de la lista
+                    this.posts = this.posts.filter(p => p.publicacion_id !== deletedPostId);
+                }
+            );
             
             // suscribirse a cambios de autenticacion
             subscribeToAuthStateChanges((userState) => {
@@ -101,32 +134,40 @@ export default {
             this.loading = false;
         }
     },
+    beforeUnmount() {
+        // Limpiar suscripción cuando el componente se desmonte
+        if (this.postsSubscription) {
+            this.postsSubscription.unsubscribe();
+        }
+    },
 }
 </script>
 
     <template>
         <!-- Hero section -->
-        <div class="bg-crochet-bg-secondary rounded-3xl p-12 mb-12 text-center border-2 border-crochet-violeta/30">
-                <h1 class="text-6xl font-bold mb-6 text-crochet-violeta">
-                    Bienvenidos a Lanastina!
-                </h1>
-                <p class="text-xl text-crochet-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-                    Un lugar donde las tejedoras compartimos nuestros proyectos, nos inspiramos mutuamente y aprendemos juntas.
-                </p>
-                <div class="flex justify-center gap-4 text-crochet-text-muted">
-                    <span class="flex items-center gap-2">
-                        <span class="text-crochet-verde">✨</span> Proyectos
-                    </span>
-                    <span class="flex items-center gap-2">
-                        <span class="text-crochet-turquesa">🎨</span> Ideas
-                    </span>
-                    <span class="flex items-center gap-2">
-                        <span class="text-crochet-rosa">👥</span> Amigas
-                    </span>
-                </div>
-        </div>
+        <header class="bg-crochet-bg-secondary rounded-3xl p-12 mb-12 text-center border-2 border-crochet-violeta/30">
+            <h1 class="text-6xl font-bold mb-6 text-crochet-violeta">
+                Bienvenidos a Lanastina!
+            </h1>
+            <p class="text-xl text-crochet-text-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
+                Un lugar donde las tejedoras compartimos nuestros proyectos, nos inspiramos mutuamente y aprendemos juntas.
+            </p>
+            <nav aria-label="Características principales">
+                <ul class="flex justify-center gap-4 text-crochet-text-muted list-none">
+                    <li class="flex items-center gap-2">
+                        <span class="text-crochet-verde" aria-hidden="true">✨</span> Proyectos
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="text-crochet-turquesa" aria-hidden="true">🎨</span> Ideas
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="text-crochet-rosa" aria-hidden="true">👥</span> Amigas
+                    </li>
+                </ul>
+            </nav>
+        </header>
 
-        <section class="mt-8">
+        <section class="mt-8" aria-label="Publicaciones">
             <h2 class="mb-8 text-3xl font-bold text-crochet-violeta text-center">
                 Publicaciones recientes
             </h2>
@@ -196,8 +237,8 @@ export default {
                 </span>
             </div>
             
-            <!-- Botón de Like -->
-            <div class="flex items-center gap-3 pt-4 border-t border-crochet-violeta/20">
+            <!-- Botón de Like y Editar -->
+            <div class="flex items-center justify-between gap-3 pt-4 border-t border-crochet-violeta/20">
                 <button 
                     @click="toggleLike(post)"
                     :class="[
@@ -211,7 +252,20 @@ export default {
                     <span class="font-bold">{{ post.total_likes || 0 }}</span>
                     <span class="text-xs">{{ post.total_likes === 1 ? 'like' : 'likes' }}</span>
                 </button>
+                
+                <!-- Botón editar (solo si es el autor) -->
+                <RouterLink
+                    v-if="user && user.id === post.perfil_id"
+                    :to="`/editar/${post.publicacion_id}`"
+                    class="px-4 py-2 bg-crochet-turquesa hover:bg-crochet-violeta text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 text-sm"
+                    title="Editar publicación"
+                >
+                    ✏️ Editar
+                </RouterLink>
             </div>
+            
+            <!-- Comentarios -->
+            <Comentarios :publicacion-id="post.publicacion_id" :user="user" />
         </article>
     </section>
 </template>

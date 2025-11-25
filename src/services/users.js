@@ -38,21 +38,42 @@ async function usernameExists(username) {
 }
 
 export async function getUserProfile(userId) {
-    const { data, error } = await supabase
-        .from('perfiles')
-        .select('*')
-        .eq('perfil_id', userId)
-        .single();
+    try {
+        const { data, error } = await supabase
+            .from('perfiles')
+            .select('*')
+            .eq('perfil_id', userId)
+            .single();
 
-    if (error) {
-        console.error('[users.js getUserProfile] Error al obtener el perfil: ', error);
-        if (error.code === 'PGRST116') {
-            throw new Error('El usuario no existe en la base de datos');
+        if (error) {
+            console.error('[users.js getUserProfile] Error al obtener el perfil: ', error);
+            console.error('[users.js getUserProfile] Error code: ', error.code);
+            console.error('[users.js getUserProfile] Error message: ', error.message);
+            console.error('[users.js getUserProfile] User ID: ', userId);
+            
+            if (error.code === 'PGRST116') {
+                console.warn('[users.js getUserProfile] El perfil no existe, puede que necesite crearse');
+                throw new Error('El usuario no existe en la base de datos');
+            }
+            
+            if (error.code === '42501') {
+                console.error('[users.js getUserProfile] Error de permisos RLS - la política no permite leer el perfil');
+                throw new Error('No tienes permisos para ver este perfil. Verifica las políticas RLS en Supabase.');
+            }
+            
+            throw new Error(error.message || 'Error al obtener el perfil');
         }
-        throw new Error(error.message);
-    }
 
-    return data;
+        if (!data) {
+            console.warn('[users.js getUserProfile] No se encontró el perfil para el usuario: ', userId);
+            throw new Error('El perfil no existe');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('[users.js getUserProfile] Error completo: ', error);
+        throw error;
+    }
 }
 
 export async function updateUserProfile(userId, updates) {

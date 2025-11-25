@@ -1,8 +1,9 @@
 <script>
 import UserTag from '../components/UserTag.vue';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
+import Comentarios from '../components/Comentarios.vue';
 import { getUserProfile } from '../services/users';
-import { fetchUserPosts } from '../services/posts';
+import { fetchUserPosts, subscribeToPostsChanges } from '../services/posts';
 import { fetchUserIntereses } from '../services/intereses';
 import { darLike, quitarLike, verificarLike } from '../services/likes';
 import { subscribeToAuthStateChanges } from '../services/auth';
@@ -13,7 +14,7 @@ import { deletePost } from '../services/posts';
 
 export default {
     name: 'UserProfile',
-    components: { UserTag, SkeletonLoader },
+    components: { UserTag, SkeletonLoader, Comentarios },
     setup() {
         const { show } = usePopup();
         const { splitText } = useUserTags();
@@ -32,6 +33,7 @@ export default {
                 email: null,
             },
             isAdmin: false,
+            postsSubscription: null,
         }
     },
     computed: {
@@ -173,11 +175,42 @@ export default {
                 this.isAdmin = false;
             }
         });
+        
+        // suscribirse a cambios en tiempo real de publicaciones
+        this.postsSubscription = subscribeToPostsChanges(
+            (newPost) => {
+                // Si es una publicación nueva del usuario del perfil, agregarla
+                if (this.profile && newPost.perfil_id === this.profile.perfil_id) {
+                    const exists = this.posts.some(p => p.publicacion_id === newPost.publicacion_id);
+                    if (!exists) {
+                        this.posts.unshift(newPost);
+                    }
+                }
+            },
+            (updatedPost) => {
+                // Actualizar publicación si pertenece al usuario del perfil
+                if (this.profile && updatedPost.perfil_id === this.profile.perfil_id) {
+                    const index = this.posts.findIndex(p => p.publicacion_id === updatedPost.publicacion_id);
+                    if (index !== -1) {
+                        this.posts[index] = updatedPost;
+                    }
+                }
+            },
+            (deletedPostId) => {
+                // Eliminar publicación de la lista
+                this.posts = this.posts.filter(p => p.publicacion_id !== deletedPostId);
+            }
+        );
     },
     // watch para cambios de ruta
     watch: {
         '$route.params.id': function() {
             this.loadUserData();
+        }
+    },
+    beforeUnmount() {
+        if (this.postsSubscription) {
+            this.postsSubscription.unsubscribe();
         }
     },
 }
@@ -355,6 +388,9 @@ export default {
                         </button>
                     </div>
                 </div>
+                
+                <!-- Comentarios -->
+                <Comentarios :publicacion-id="post.publicacion_id" :user="user" />
             </article>
         </section>
     </div>
